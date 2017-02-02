@@ -5,6 +5,8 @@
  */
 package lenguajesformalesyautomatas;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
+
 /**
  *
  * @author gabriel
@@ -32,6 +34,11 @@ public class Principal extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         btnCargarArchivo.setText("Cargar Archivo");
+        btnCargarArchivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCargarArchivoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -52,6 +59,12 @@ public class Principal extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    
+    private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
+        // TODO add your handling code here:
+        Archivo entrada = new Archivo();
+        entrada.Cargar();
+    }//GEN-LAST:event_btnCargarArchivoActionPerformed
 
     /**
      * @param args the command line arguments

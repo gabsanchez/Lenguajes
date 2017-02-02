@@ -14,8 +14,12 @@ public class LenguajesFormalesYAutomatas {
     /**
      * @param args the command line arguments
      */
+    
+    
     public static void main(String[] args) {
         // TODO code application logic here
+        Principal inicio = new Principal();
+        inicio.setVisible(true);
     }
     
 }
