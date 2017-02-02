@@ -6,6 +6,9 @@
 package lenguajesformalesyautomatas;
 
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -63,7 +66,14 @@ public class Principal extends javax.swing.JFrame {
     private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
         // TODO add your handling code here:
         Archivo entrada = new Archivo();
-        entrada.Cargar();
+        try 
+        {
+            entrada.Cargar();
+        } 
+        catch (IOException ex) 
+        {
+            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btnCargarArchivoActionPerformed
 
     /**
