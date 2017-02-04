@@ -74,7 +74,7 @@ public class Principal extends javax.swing.JFrame {
         {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //hola sanchf
+        //hola sanchez
     }//GEN-LAST:event_btnCargarArchivoActionPerformed
 
     /**
