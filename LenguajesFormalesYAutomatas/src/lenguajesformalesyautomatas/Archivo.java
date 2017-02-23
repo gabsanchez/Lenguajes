@@ -17,15 +17,13 @@ import java.io.RandomAccessFile;
 public class Archivo 
 {
     FileDialog fd = null;
-    RandomAccessFile lector1 = null;
-    RandomAccessFile lector2 = null;
+    RandomAccessFile lector = null;
     Principal form = new Principal();
     String nombreArchivo;
     long tamArchivo;
-    byte[] buffer1 = null;
-    byte[] buffer2 = null;
+    byte[] buffer = null;
     
-    String error = "";
+    public String error = "";
     
     public Archivo()
     {
@@ -35,24 +33,17 @@ public class Archivo
     {
         fd.setVisible(true);
         nombreArchivo = fd.getDirectory() + fd.getFile();
-        //Leer(nombreArchivo, 15);
+        //Leer(nombreArchivo, 1, 23);
         Analizar();
     }
     public void Leer(String nombreA, int size, long pos) throws FileNotFoundException, IOException
     {
-        lector1 = new RandomAccessFile(nombreA, "r");
-        lector2 = new RandomAccessFile(nombreA, "r");
-        buffer1 = new byte[size];
-        buffer2 = new byte[size];
-        tamArchivo = lector1.length();
-        lector1.seek(pos);
-        lector2.seek(pos);
-        lector1.read(buffer1);
-        lector2.read(buffer2);
-        lector1.close();
-        lector2.close();
-        System.out.println(new String(buffer1));
-        System.out.println(new String(buffer2));
+        lector = new RandomAccessFile(nombreA, "r");
+        buffer = new byte[size];
+        tamArchivo = lector.length();
+        lector.seek(pos);
+        lector.read(buffer);
+        lector.close();
     }
     public void Analizar() throws IOException
     {
@@ -62,117 +53,211 @@ public class Archivo
         while(!banderaFinal)
         {
             Leer(nombreArchivo, 1, cont);
-            String caracterA = new String(buffer1).toLowerCase();
+            String caracterA = new String(buffer).toLowerCase();
             if(caracterA.equals("t"))
             {
                 cont++;
-                Leer(nombreArchivo, 1, cont);
-                caracterA = new String(buffer1).toLowerCase();
-                if(caracterA.equals("o"))
+                Leer(nombreArchivo, 5, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if (caracterA.equals("okens"))
                 {
-                    cont++;
-                    Leer(nombreArchivo, 1, cont);
-                    caracterA = new String(buffer1).toLowerCase();
-                    if(caracterA.equals("k"))
+                    banderaInicial = true;
+                    cont = cont + 5;
+                }
+                else if(banderaInicial)
+                {
+                    Leer(nombreArchivo, 5, cont);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("oken "))
                     {
-                        cont++;
-                        Leer(nombreArchivo, 1, cont);
-                        caracterA = new String(buffer1).toLowerCase();
-                        if(caracterA.equals("e"))
+                        cont = cont + 5;
+                        cont = AnalizarToken(cont);
+                        if(!error.equals(""))
                         {
-                            cont++;
-                            Leer(nombreArchivo, 1, cont);
-                            caracterA = new String(buffer1).toLowerCase();
-                            if(caracterA.equals("n"))
-                            {
-                                if (banderaInicial) 
-                                {
-                                    //Analizar token
-                                    cont++;
-                                    Leer(nombreArchivo, 1, cont);
-                                    caracterA = new String(buffer1).toLowerCase();
-                                    if(caracterA.equals(" "))
-                                    {
-                                        AnalizarToken(cont);
-                                    }
-                                }
-                                else
-                                {
-                                    cont++;
-                                    Leer(nombreArchivo, 1, cont);
-                                    caracterA = new String(buffer1).toLowerCase();
-                                    if(caracterA.equals("s"))
-                                    {
-                                        banderaInicial = true;
-                                    
-                                    }
-                                }
-                            }
+                            break;
                         }
+                    }
+                }
+                else
+                {
+                    if(banderaInicial)
+                    {
+                        //es conjunto
+                        cont = AnalizarConjunto(cont);
+                        if(!error.equals(""))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        error = "TOKENS expected.";
+                        break;
                     }
                 }
             }
             else if(cont == tamArchivo)
             {
                 error = "TOKENS expected.";
-                banderaFinal = true;
+                break;
+            }
+            else if(EsCaracter(cont))
+            {
+                if (banderaInicial) 
+                {
+                    //Leer(nombreArchivo, 1, cont);
+                    //caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("r")) 
+                    {
+                        cont++;
+                        Leer(nombreArchivo, 9, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("eservadas"))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        //Es conjunto
+                        cont = AnalizarConjunto(cont);
+                        if(!error.equals(""))
+                        {
+                            break;
+                        }
+                    }
+                }
             }
             else
             {
-                //Es conjunto.
                 cont++;
             }
-            
         }
+        
     }
-    public void AnalizarToken(long cont) throws IOException
+    public long AnalizarToken(long cont) throws IOException
     {
         String caracterA = "";
-        boolean banderaNumero = false, banderaIgual = false;
+        boolean banderaNumero = false;
+        boolean banderaIgual = false;
         while(!caracterA.equals(";"))
         {
             Leer(nombreArchivo, 1, cont);
-            caracterA = new String(buffer1).toLowerCase();
+            caracterA = new String(buffer).toLowerCase();
             if (Character.isDigit(caracterA.charAt(0))) {
                 while(Character.isDigit(caracterA.charAt(0)))
                 {
                     cont++; 
                     Leer(nombreArchivo, 1, cont);
-                    caracterA = new String(buffer1).toLowerCase();
+                    caracterA = new String(buffer).toLowerCase();
                 }                       
                 banderaNumero = true;
             }
-            else if (banderaNumero) {
-                if (caracterA.equals("=")) {
+            else if (banderaNumero) 
+            {
+                cont = ComerEspacio(cont);
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if (caracterA.equals("=")) 
+                {
                     cont++;
                     banderaIgual = true;
                 }
-                if (banderaIgual) {
+                else if (banderaIgual) 
+                {
+                    cont = ComerEspacio(cont);
                     //Analizar Expresiones.
+                    if (caracterA.equals("'")) {
+                        Leer(nombreArchivo, 1, cont+2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("'")) {
+                            cont = cont+3;
+                        }
+                        else
+                        {
+                            error = "' expected";
+                            break;
+                        }
+                    }
+                    else if (caracterA.equals("\"")) 
+                    {
+                        Leer(nombreArchivo, 1, cont+2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("\"")) 
+                        {
+                            cont = cont+3;
+                        }
+                        else
+                        {
+                            error = "\" expected";
+                            break;
+                        }
+                    }
                 }
-                else{
-                cont = ComerEspacios(cont);
+                else
+                {
+                    error = "= expected";
+                    break;
+                }
             }
-            }
-            else{
-                cont = ComerEspacios(cont);
+            else
+            {
+                if (EsCaracter(cont)) 
+                {
+                    error = "Token number expected";
+                    break;
+                }
+                else
+                {
+                    cont = ComerEspacio(cont);
+                }
             }
             
         }
+        return cont+1;
     }
     
-    public long ComerEspacios(long cont) throws IOException
+    public long ComerEspacio(long cont) throws IOException
+    {
+        if(!EsCaracter(cont)) 
+        {
+            cont++;
+        }
+        return cont;
+    }
+    public boolean EsCaracter(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
-        String caracterA = new String(buffer1).toLowerCase();
-        if(caracterA.equals(" ")) {
-            cont++;
-        }
-        else if(caracterA.equals("\t")) {
-            cont++;
-        }
-        else if(caracterA.equals("\n")) {
-            cont++;
+        String caracterA = new String(buffer).toLowerCase();
+        return !caracterA.equals(" ") && !caracterA.equals("\t") && !caracterA.equals("\n");
+    }
+    public long AnalizarConjunto(long cont) throws IOException
+    {
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        boolean banderaID = false;
+        while(!caracterA.equals("{"))
+        {
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            
+            if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
+            {
+                error = "Invalid group name";
+                break;
+            }
+            else
+            {
+               if(EsCaracter(cont)) 
+               {
+                   cont++;
+                   banderaID = true;
+               }
+               else
+               {
+                   cont = ComerEspacio(cont);
+               }
+            } 
         }
         return cont;
     }

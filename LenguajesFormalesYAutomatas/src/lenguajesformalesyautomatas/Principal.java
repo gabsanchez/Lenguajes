@@ -9,6 +9,7 @@ import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -69,10 +70,17 @@ public class Principal extends javax.swing.JFrame {
         try 
         {
             entrada.Cargar();
+            if(entrada.error.equals(""))
+            JOptionPane.showMessageDialog(rootPane, "File read correctly");
+            else
+            {
+                JOptionPane.showMessageDialog(rootPane, entrada.error);
+            }
         } 
         catch (IOException ex) 
         {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, entrada.error);
         }
         //hola sanchez
     }//GEN-LAST:event_btnCargarArchivoActionPerformed
