@@ -9,6 +9,8 @@ import java.awt.FileDialog;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -25,6 +27,8 @@ public class Archivo
     int fila = 0, columna = 0;
     
     public String error = "";
+    
+    List Acciones = new ArrayList();
     
     public Archivo()
     {
@@ -134,6 +138,7 @@ public class Archivo
                         if (caracterA.equals("rror"))
                         {
                             //seccion de error
+                            cont = cont + 4;
                             break;
                         }
                         else
@@ -783,6 +788,7 @@ public class Archivo
     {
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
+        String Accion="";
         boolean banderaFin=false;
         boolean banderaID = false, banderaNombre = false, banderaParentesis = false;
         while(!banderaFin)
@@ -832,6 +838,7 @@ public class Archivo
                             }
                             else if (!banderaID) {
                                 cont++;
+                                Accion = Accion + caracterA;
                                 banderaID=true;
                             }
                         } 
@@ -839,12 +846,15 @@ public class Archivo
                         {
                             if (caracterA.equals("_")) {
                                 cont++;
+                                Accion = Accion + caracterA;
                             }
                             else if (Character.isDigit(caracterA.charAt(0))) {
                                 cont++;
+                                Accion = Accion + caracterA;
                             }
                             else if (Character.isLetter(caracterA.charAt(0))) {
                                 cont++;
+                                Accion = Accion + caracterA;
                             }
                             else if (!EsCaracter(cont)) {
                                 banderaNombre=true;
@@ -906,6 +916,12 @@ public class Archivo
                     {
                         break;
                     }
+                    Acciones.add(Accion);
+                    banderaID=false;
+                    banderaNombre =false;
+                    banderaParentesis=false;
+                    Accion="";
+                    
                 }
             }
             else if (EsCaracter(cont)) {
@@ -934,6 +950,7 @@ public class Archivo
                         }
                         else if (!banderaID) {
                             cont++;
+                            Accion = Accion + caracterA;
                             banderaID=true;
                         }
                         
@@ -942,12 +959,15 @@ public class Archivo
                     {
                         if (caracterA.equals("_")) {
                             cont++;
+                            Accion = Accion + caracterA;
                         }
                         else if (Character.isDigit(caracterA.charAt(0))) {
                             cont++;
+                            Accion = Accion + caracterA;
                         }
                         else if (Character.isLetter(caracterA.charAt(0))) {
                             cont++;
+                            Accion = Accion + caracterA;
                         }
                         else if (!EsCaracter(cont)) {
                             banderaNombre=true;
@@ -1008,6 +1028,12 @@ public class Archivo
                 {
                     break;
                 }
+                Acciones.add(Accion);
+                banderaID=false;
+                banderaNombre =false;
+                banderaParentesis=false;
+                Accion="";
+                
             }
         }
         return cont;
@@ -1017,6 +1043,7 @@ public class Archivo
     {
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
+        String Token="";
         boolean banderaNum=false, banderaIgual=false, banderaComilla = false;
         while(!caracterA.equals("}"))
         {
@@ -1030,12 +1057,16 @@ public class Archivo
                 }
                 if (!banderaNum) {
                     cont++;
+                    Token=Token+caracterA;
                     banderaNum=true;   
                 }
                 else if (banderaNum) {
                     Leer(nombreArchivo, 1, cont-1);
                     caracterA = new String(buffer).toLowerCase();
                     if (Character.isDigit(caracterA.charAt(0))) {
+                        Leer(nombreArchivo, 1, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        Token=Token+caracterA;
                         cont++;
                     }
                     else
@@ -1133,16 +1164,34 @@ public class Archivo
                     banderaNum=false;
                     banderaIgual=false;
                     banderaComilla=false;
+                    Token="";
                 }
             }
             else if (EsCaracter(cont)) {
-                error = "invalid char.";
-                break;
+                if (!caracterA.equals("}")) {
+                    error = "Invalid char.";
+                    break;
+                }
+                else if(caracterA.equals("}"))
+                { 
+                    if (banderaComilla) {
+                        banderaNum=false;
+                        banderaIgual=false;
+                        banderaComilla=false;
+                        Token="";
+                    }
+                    if (banderaComilla || banderaIgual || banderaNum) 
+                    {
+                        error = "Invalid char.";
+                        break;
+                    }
+                }
             }
         }
         cont = cont +1;
         return cont;
     }
+    
     private long ValidarParentesis(long cont, long fin, boolean banderaO, boolean banderaC) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -1175,6 +1224,7 @@ public class Archivo
         }
         return cont;
     }
+    
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
         boolean bandera = false; //Valida que una expresion sea correcta para no volverla a evaluar
@@ -1321,6 +1371,39 @@ public class Archivo
             caracterA = new String(buffer).toLowerCase();
         }
         
+        return cont;
+    }
+    
+    public long AnalizarError(long cont) throws IOException
+    {
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        boolean banderaFinal=false,banderaIgual=false, banderaNum=false;
+        while(!banderaFinal)
+        {
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            if (!EsCaracter(cont)) {
+                cont++;
+            }
+            else if (caracterA.equals("=")) {
+                banderaIgual=true;
+                cont++;
+            }
+            else if (Character.isDigit(caracterA.charAt(0))) {
+                if (banderaIgual) {
+                    banderaNum=true;
+                    cont++;
+                }
+                else if (!banderaIgual) {
+                    error="= expected.";
+                    break;
+                }
+            }
+            else if (EsCaracter(cont)) {
+                
+            }
+        }
         return cont;
     }
 }
