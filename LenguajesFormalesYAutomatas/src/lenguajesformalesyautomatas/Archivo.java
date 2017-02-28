@@ -241,7 +241,7 @@ public class Archivo
                 }
                 else if (banderaIgual) 
                 {
-                    cont = ComerEspacio(cont);
+                    cont = SaltarEspacios(cont);
                     Leer(nombreArchivo, 1, cont);
                     caracterA = new String(buffer).toLowerCase();
                     long flag = cont;
@@ -337,7 +337,15 @@ public class Archivo
         }
         return cont+1;
     }
-    
+    private long SaltarEspacios(long cont) throws IOException
+    {
+        long espacios = cont;
+        while(!EsCaracter(espacios))
+        {
+            espacios++;
+        }
+        return espacios;
+    }
     public long ComerEspacio(long cont) throws IOException
     {
         if(!EsCaracter(cont)) 
@@ -352,6 +360,7 @@ public class Archivo
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         return !caracterA.equals(" ") && !caracterA.equals("\t") && !caracterA.equals("\n") && !caracterA.equals("\r");
+        
     }
     
     int contElementos=0;
@@ -1320,11 +1329,12 @@ public class Archivo
                         if(bandera)
                         {
                             cont = EvaluarExpresion(inicio, cont);
-                            cont--;
+                            //cont--;
                         }
                         else
                         {
                             error = "Invalid regex symbol '*'";
+                            break loop;
                         }
                         break;
                     }
@@ -1404,7 +1414,10 @@ public class Archivo
                         }
                         break;
                     }
+                    default:
+                        break;
                 }
+                bandera = true;
                 cont++;
                 Leer(nombreArchivo, 1, cont);
                 caracterA = new String(buffer).toLowerCase();
@@ -1422,7 +1435,7 @@ public class Archivo
     }
     private long TokensEspeciales(long cont) throws IOException
     {
-        cont = ComerEspacio(cont);
+        cont = SaltarEspacios(cont);
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         if(Character.isDigit(caracterA.charAt(0)))
