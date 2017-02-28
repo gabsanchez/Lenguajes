@@ -22,6 +22,7 @@ public class Archivo
     String nombreArchivo;
     long tamArchivo;
     byte[] buffer = null;
+    int fila = 0, columna = 0;
     
     public String error = "";
     
@@ -105,14 +106,44 @@ public class Archivo
             {
                 if (banderaInicial) 
                 {
-                    if (caracterA.equals("a")) 
-                    {
+                    if (caracterA.equals("a")) {
                         cont++;
                         Leer(nombreArchivo, 7, cont);
                         caracterA = new String(buffer).toLowerCase();
                         if (caracterA.equals("cciones"))
                         {
+                            //seccion de acciones
+                            cont = cont + 7;
+                            cont = AnalizarAcciones(cont);
+                        }
+                        else
+                        {
+                            //Es conjunto
+                            cont = AnalizarConjunto(cont);
+                            if(!error.equals(""))
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    else if (caracterA.equals("e")) 
+                    {
+                        cont++;
+                        Leer(nombreArchivo, 4, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("rror"))
+                        {
+                            //seccion de error
                             break;
+                        }
+                        else
+                        {
+                            //Es conjunto
+                            cont = AnalizarConjunto(cont);
+                            if(!error.equals(""))
+                            {
+                                break;
+                            }
                         }
                     }
                     else
@@ -125,14 +156,24 @@ public class Archivo
                         }
                     }
                 }
+                else
+                {
+                    error = "TOKENS expected.";
+                    break;
+                }
             }
             else
             {
                 cont++;
             }
+            if(!error.equals(""))
+            {
+                break;
+            }
         }
         
     }
+    
     public long AnalizarToken(long cont) throws IOException
     {
         String caracterA = "";
@@ -256,17 +297,24 @@ public class Archivo
         }
         return cont;
     }
+    
     public boolean EsCaracter(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
-        return !caracterA.equals(" ") && !caracterA.equals("\t") && !caracterA.equals("\n");
+        return !caracterA.equals(" ") && !caracterA.equals("\t") && !caracterA.equals("\n") && !caracterA.equals("\r");
     }
+    
+    int contElementos=0;
     public long AnalizarConjunto(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
-        boolean banderaID = false;
+        boolean banderaID = false, banderaNombre = false;
+        if (caracterA.equals("{")) {
+            error = "Invalid group name.";
+            return cont;
+        }
         while(!caracterA.equals("{"))
         {
             Leer(nombreArchivo, 1, cont);
@@ -274,22 +322,810 @@ public class Archivo
             
             if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
             {
-                error = "Invalid group name";
-                break;
+                if (banderaNombre) {
+                    error = "{ expected.";
+                    break;
+                }
+                else
+                {
+                    error = "Invalid group name.";
+                    break;
+                }
+            }
+            else if (Character.isLetter(caracterA.charAt(0)) && !banderaID)
+            {
+                if (!banderaID) {
+                    cont++;
+                    banderaID=true;
+                }
+            } 
+            else if (banderaID) 
+            {
+                if (caracterA.equals("_")) {
+                    cont++;
+                }
+                else if (Character.isDigit(caracterA.charAt(0))) {
+                    cont++;
+                }
+                else if (Character.isLetter(caracterA.charAt(0))) {
+                    cont++;
+                }
+                else if (!EsCaracter(cont)) {
+                    banderaNombre=true;
+                    banderaID=false;
+                    cont++;
+                }
+                else if (EsCaracter(cont) && !caracterA.equals("{")) {
+                    error = "Invalid group name.";
+                    break;
+                }
+            }
+            else if (banderaNombre)
+            {
+                if (!EsCaracter(cont)||caracterA.equals("{") ) {
+                    cont++;
+                }
+                else
+                {
+                    error = "{ expected.";
+                    break;
+                }
             }
             else
             {
-               if(EsCaracter(cont)) 
-               {
-                   cont++;
-                   banderaID = true;
-               }
-               else
-               {
-                   cont = ComerEspacio(cont);
-               }
-            } 
+                error = "Invalid group name.";
+                break;
+            }
         }
+        
+        if (error == "") //si no hay error evaluar el contenido
+        {
+            cont++;
+            
+            while(!caracterA.equals("}"))
+            {
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if (caracterA.equals("'")) 
+                {
+                    Leer(nombreArchivo, 1, cont+2);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("'")) {
+                        cont = cont+3;
+                        contElementos++;
+                    }
+                    else
+                    {
+                        error = "' expected";
+                        break;
+                    }
+                }
+                else if (caracterA.equals("\"")) 
+                {
+                    Leer(nombreArchivo, 1, cont+2);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("\"")) 
+                    {
+                        cont = cont+3;
+                        contElementos++;
+                    }
+                    else
+                    {
+                        error = "\" expected";
+                        break;
+                    }
+                }
+                else if (caracterA.equals(".")) 
+                {
+                    Leer(nombreArchivo, 1, cont+1);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals(".")) 
+                    {
+                        //Buscar elemento siguiente y anterior.
+                        cont = AnalizarRango(cont);
+                        if(!error.equals(""))
+                        {
+                            break;
+                        }
+                        contElementos++;
+                    }
+                    else
+                    {
+                        error = ". expected";
+                        break;
+                    }
+                }
+                else if (caracterA.equals("c")) 
+                {
+                    Leer(nombreArchivo, 2, cont+1);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("hr"))
+                    {
+                        cont = cont+3;
+                        //es un chr
+                        cont = AnalizarCHR(cont);
+                        if(!error.equals(""))
+                        {
+                            break;
+                        }
+                        contElementos++;
+                    }
+                    else
+                    {
+                        error = "Invalid gropu element.";
+                        break;
+                    }
+                }
+                else
+                {
+                    if(!EsCaracter(cont)) 
+                    {
+                        cont = ComerEspacio(cont);
+                    }
+                    else if (caracterA.equals("+"))
+                    {
+                        if (contElementos == 1) {
+                            cont++;
+                            contElementos--;
+                        }
+                        else
+                        {
+                            error = "Bad use +.";
+                            break;
+                        }
+                    }
+                    else if(EsCaracter(cont)&&!caracterA.equals("}"))
+                    {
+                        error = "Invalid group element.";
+                        break;
+                    }
+
+                }
+                
+                if (contElementos > 1) {
+                    error = "+ expected.";
+                    break;
+                }
+            }
+        }
+        
+        contElementos=0;
+        return cont + 1;
+    }
+    
+    public long AnalizarRango(long cont) throws IOException
+    {
+        long Aux = cont;
+        boolean PrimerElemento=false, SegundoElemento=false;
+        byte Elemento = DistinguirPrimerElemento(cont);
+        if(!error.equals(""))
+        {
+            return cont;
+        }
+        
+        Leer(nombreArchivo, 1, Aux-1);
+        String caracterA = new String(buffer).toLowerCase();
+        
+        //if (Elemento == -1 || Elemento == 1) 
+       // {
+            if (PrimerElemento==false) 
+            {
+                if(caracterA.equals("'")) {
+                    PrimerElemento=true;
+                }
+                else if(caracterA.equals("\"")) {
+                    PrimerElemento=true;
+                }
+                else if (caracterA.equals(")")) {
+                    PrimerElemento=true;
+                }
+                else   
+                {
+                    if (Elemento == -1) {
+                        while(!caracterA.equals("'"))
+                        {
+                            Aux--;
+                            Leer(nombreArchivo, 1, Aux);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("'")) {
+                                PrimerElemento=true;
+                            }
+                            else if (EsCaracter(Aux)) {
+                                error = "Range definition error.";
+                                break;
+                            }
+                        }
+                    }
+                    else if (Elemento == 0) {
+                        while(!caracterA.equals("\""))
+                        {
+                            Aux--;
+                            Leer(nombreArchivo, 1, Aux);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("\"")) {
+                                PrimerElemento=true;
+                            }
+                            else if (EsCaracter(Aux)) {
+                                error = "Range definition error.";
+                                break;
+                            }
+                        }
+                    }
+                    else if (Elemento == 1) {
+                        while(!caracterA.equals(")"))
+                        {
+                            Aux--;
+                            Leer(nombreArchivo, 1, Aux);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals(")")) {
+                                PrimerElemento=true;
+                            }
+                            else if (EsCaracter(Aux)) {
+                                error = "Range definition error.";
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (PrimerElemento==true) 
+                {
+                    Leer(nombreArchivo, 1, cont+2);
+                    caracterA = new String(buffer).toLowerCase();
+                    if(caracterA.equals("'")) {
+                        SegundoElemento=true;
+                        cont = cont + 2;
+                    }
+                    else if(caracterA.equals("\"")) {
+                        SegundoElemento=true;
+                        cont = cont + 2;
+                    }
+                    else if (caracterA.equals("c")) {
+                        //examinar c
+                        cont = cont + 2;
+                        Leer(nombreArchivo, 2, cont+1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("hr"))
+                        {
+                            cont = cont+3;
+                            //es un chr
+                            cont = AnalizarCHR(cont);
+                            if(!error.equals(""))
+                            {
+                                return cont;
+                            }
+                            contElementos++;
+                        }
+                        else
+                        {
+                            error = "Invalid gropu element.";
+                            return cont;
+                        }
+                    }
+                    else   
+                    {
+                        cont = cont + 1;
+                        while(!caracterA.equals("'")&& !caracterA.equals("c")&& !caracterA.equals("\""))
+                        {
+                            cont++;
+                            Leer(nombreArchivo, 1, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("'")) {
+                                SegundoElemento=true;
+                            }
+                            else if (caracterA.equals("\"")) {
+                                SegundoElemento=true;
+                            }
+                            else if (caracterA.equals("c")) {
+                                //examinar c
+                                Leer(nombreArchivo, 2, cont+1);
+                                caracterA = new String(buffer).toLowerCase();
+                                if (caracterA.equals("hr"))
+                                {
+                                    cont = cont+3;
+                                    //es un chr
+                                    cont = AnalizarCHR(cont);
+                                    if(!error.equals(""))
+                                    {
+                                        break;
+                                    }
+                                    caracterA = "c";
+                                }
+                                else
+                                {
+                                    error = "Invalid gropu element.";
+                                    break;
+                                }
+                            }
+                            else if(EsCaracter(cont)) {
+                                error = "Range definition error.";
+                                break;
+                            }
+                        } 
+                    }
+                    
+                    if (SegundoElemento==true) 
+                    {                      
+                        if (caracterA.equals("'")) 
+                        {
+                            Leer(nombreArchivo, 1, cont+2);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("'")) {
+                                cont = cont+3;                                
+                            }
+                            else
+                            {
+                                error = "' expected";
+                                return cont;
+                            }
+                        }
+                        else if (caracterA.equals("\"")) 
+                        {
+                            Leer(nombreArchivo, 1, cont+2);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("\"")) {
+                                cont = cont+3;                                
+                            }
+                            else
+                            {
+                                error = "\" expected";
+                                return cont;
+                            }
+                        }
+                    }
+                    contElementos--;
+                }
+            }
+            
+        return cont;
+    }
+    
+    public byte DistinguirPrimerElemento(long cont) throws IOException
+    {
+        boolean BanderaComillas= false;
+        byte PrimerElemento = 0;
+        long Aux = cont;
+        Leer(nombreArchivo, 1, Aux-1);
+        String caracterA = new String(buffer).toLowerCase();
+        if(caracterA.equals("'")) {
+            PrimerElemento = -1;
+        }
+        else if (caracterA.equals("\"")) {
+            PrimerElemento = 0;
+        }
+        else if (caracterA.equals(")")) {
+            PrimerElemento = 1;
+        }
+        else   
+        {
+            while(!caracterA.equals("\"")&&!caracterA.equals("'")&&!caracterA.equals(")"))
+            {
+                Aux--;
+                Leer(nombreArchivo, 1, Aux);
+                caracterA = new String(buffer).toLowerCase();
+                if (caracterA.equals("\"")) {
+                    PrimerElemento = 0;
+                }
+                else if (caracterA.equals("'")) {
+                    PrimerElemento = -1;
+                }
+                else if (caracterA.equals(")")) {
+                    PrimerElemento = 1;
+                }
+                else if (EsCaracter(Aux)) {
+                    error = "Range definition error.";
+                    break;
+                }
+            }        
+        }
+        return PrimerElemento;
+    }
+    
+    public long AnalizarCHR(long cont) throws IOException
+    {
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        boolean banderaNum=false, banderaYano= false;
+        if (caracterA.equals("(")) {
+            cont++;
+        }
+        else
+        {
+            while(!caracterA.equals("("))
+            {
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if (!EsCaracter(cont)) {
+                    cont++;
+                }
+                else if (!caracterA.equals("(")) {
+                    error = "( expected.";
+                    break;
+                }
+            }
+            if(!error.equals(""))
+            {
+                return cont;
+            }
+            cont++;            
+        }
+        
+        while(!caracterA.equals(")"))
+        {
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            if (!EsCaracter(cont)) {
+                if (!banderaNum) {
+                    cont++;
+                }
+                else if (banderaNum) {
+                    cont++;
+                    banderaYano=true;
+                }
+            }
+            else if (Character.isDigit(caracterA.charAt(0))&& !banderaYano) {
+                cont++;
+                banderaNum=true;
+            }
+            else if (!caracterA.equals(")")) {
+                error = ") expected.";
+                break;
+            }
+        }
+        if (!banderaNum&&!banderaYano) {
+            error = "number expected.";
+            return cont;
+        }
+        return cont+1;
+    }
+    
+    public long AnalizarAcciones(long cont) throws IOException
+    {
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        boolean banderaFin=false;
+        boolean banderaID = false, banderaNombre = false, banderaParentesis = false;
+        while(!banderaFin)
+        {
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            if (!EsCaracter(cont)) {
+                cont++;
+            }
+            else if (caracterA.equals("e")) {
+                cont++;
+                Leer(nombreArchivo, 4, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if (caracterA.equals("rror"))
+                {
+                    //seccion de error
+                    cont =  cont+4;
+                    banderaFin=true;
+                }
+                else
+                {
+                    cont--;
+                    Leer(nombreArchivo, 4, cont);
+                    caracterA = new String(buffer).toLowerCase();
+                    while(!caracterA.equals("{"))
+                    {
+                        Leer(nombreArchivo, 1, cont);
+                        caracterA = new String(buffer).toLowerCase();
+
+                        if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
+                        {
+                            if (banderaNombre) {
+                                error = "{ expected.";
+                                break;
+                            }
+                            else
+                            {
+                                error = "Invalid action name.";
+                                break;
+                            }
+                        }
+                        else if (Character.isLetter(caracterA.charAt(0)) && !banderaID)
+                        {
+                            if (!banderaID) {
+                                cont++;
+                                banderaID=true;
+                            }
+                        } 
+                        else if (banderaID) 
+                        {
+                            if (caracterA.equals("_")) {
+                                cont++;
+                            }
+                            else if (Character.isDigit(caracterA.charAt(0))) {
+                                cont++;
+                            }
+                            else if (Character.isLetter(caracterA.charAt(0))) {
+                                cont++;
+                            }
+                            else if (!EsCaracter(cont)) {
+                                banderaNombre=true;
+                                banderaID=false;
+                                cont++;
+                            }
+                            else if (EsCaracter(cont) && !caracterA.equals("{")) {
+                                error = "Invalid action name.";
+                                break;
+                            }
+                        }
+                        else if (banderaNombre)
+                        {
+                            if (!EsCaracter(cont)) {
+                                cont++;
+                            }
+                            else if (caracterA.equals("(")) {
+                                Leer(nombreArchivo, 1, cont+1);
+                                caracterA = new String(buffer).toLowerCase();
+                                if (caracterA.equals(")")) {
+                                    cont=cont+2;
+                                    banderaParentesis = true;
+                                }
+                                else
+                                {
+                                    error = ") expected.";
+                                    break;
+                                }
+                            }
+                            else if (caracterA.equals("{") && banderaParentesis) {
+                                cont++;
+                            }
+                            else
+                            {
+                                if (!banderaParentesis) {
+                                    error = "( expected.";
+                                    break;
+                                }
+                                else
+                                {
+                                    error = "{ expected.";
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            error = "Invalid action name.";
+                            break;
+                        }
+                    }
+                    
+                    
+                    cont = AnalizarContenidoAcciones(cont);
+                    if(!error.equals(""))
+                    {
+                        break;
+                    }
+                }
+            }
+            else if (EsCaracter(cont)) {
+                while(!caracterA.equals("{"))
+                {
+                    Leer(nombreArchivo, 1, cont);
+                    caracterA = new String(buffer).toLowerCase();
+
+                    if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
+                    {
+                        if (banderaNombre) {
+                            error = "{ expected.";
+                            break;
+                        }
+                        else
+                        {
+                            error = "Invalid action name.";
+                            break;
+                        }
+                    }
+                    else if (Character.isLetter(caracterA.charAt(0)) && !banderaID)
+                    {
+                        if (!banderaID) {
+                            cont++;
+                            banderaID=true;
+                        }
+                    } 
+                    else if (banderaID) 
+                    {
+                        if (caracterA.equals("_")) {
+                            cont++;
+                        }
+                        else if (Character.isDigit(caracterA.charAt(0))) {
+                            cont++;
+                        }
+                        else if (Character.isLetter(caracterA.charAt(0))) {
+                            cont++;
+                        }
+                        else if (!EsCaracter(cont)) {
+                            banderaNombre=true;
+                            banderaID=false;
+                            cont++;
+                        }
+                        else if (EsCaracter(cont) && !caracterA.equals("{")) {
+                            error = "Invalid action name.";
+                            break;
+                        }
+                    }
+                    else if (banderaNombre)
+                    {
+                        if (!EsCaracter(cont)) {
+                            cont++;
+                        }
+                        else if (caracterA.equals("(")) {
+                            Leer(nombreArchivo, 1, cont+1);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals(")")) {
+                                cont=cont+2;
+                                banderaParentesis = true;
+                            }
+                            else
+                            {
+                                error = ") expected.";
+                                break;
+                            }
+                        }
+                        else if (caracterA.equals("{") && banderaParentesis) {
+                            cont++;
+                        }
+                        else
+                        {
+                            if (!banderaParentesis) {
+                                error = "( expected.";
+                                break;
+                            }
+                            else
+                            {
+                                error = "{ expected.";
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        error = "Invalid action name.";
+                        break;
+                    }
+                }
+                
+                cont = AnalizarContenidoAcciones(cont);
+                if(!error.equals(""))
+                {
+                    break;
+                }
+            }
+        }
+        return cont;
+    }
+    
+    public long AnalizarContenidoAcciones(long cont) throws IOException
+    {
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        boolean banderaNum=false, banderaIgual=false, banderaComilla = false;
+        while(!caracterA.equals("}"))
+        {
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            if (Character.isDigit(caracterA.charAt(0))) 
+            {
+                if (banderaIgual) {
+                    error = "' or \" expected.";
+                    break;
+                }
+                if (!banderaNum) {
+                    cont++;
+                    banderaNum=true;   
+                }
+                else if (banderaNum) {
+                    Leer(nombreArchivo, 1, cont-1);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (Character.isDigit(caracterA.charAt(0))) {
+                        cont++;
+                    }
+                    else
+                    {
+                        error = "= expected.";
+                        break;
+                    }
+                }
+            }
+            else if (caracterA.equals("=")) 
+            {
+                if (banderaNum) {
+                    if (!banderaIgual) {
+                        cont++;
+                        banderaIgual = true;
+                    }
+                    else if (banderaIgual) {
+                        error = "' or \" expected.";
+                        break;
+                    }
+
+                }
+                else if (!banderaNum) {
+                    error = "number expected.";
+                    break;
+                }
+            }
+            else if (caracterA.equals("'")) {
+                if (banderaIgual) {
+                    if (!banderaComilla) {
+                        banderaComilla = true;
+                        cont++;
+                        Leer(nombreArchivo, 1, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        while(!caracterA.equals("'"))
+                        {
+                            Leer(nombreArchivo, 1, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (!caracterA.equals("'")) {
+                                cont++;
+                            }
+                            else if (caracterA.equals("")) {
+                                error="' expected.";
+                                break;
+                            }
+                        }
+                        cont++;
+                    }
+                    else if (banderaComilla) {
+                        error="number or } expected.";
+                        break;
+                    }
+                    
+                }
+                else if (!banderaIgual) {
+                    error = "= expected.";
+                    break;
+                }
+            }
+            else if (caracterA.equals("\"")) {
+                if (banderaIgual) {
+                    if (!banderaComilla) {
+                        banderaComilla = true;
+                        cont++;
+                        Leer(nombreArchivo, 1, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        while(!caracterA.equals("\""))
+                        {
+                            Leer(nombreArchivo, 1, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (!caracterA.equals("\"")) {
+                                cont++;
+                            }
+                            else if (caracterA.equals("")) {
+                                error="\" expected.";
+                                break;
+                            }
+                        }
+                        cont++;
+                    }
+                    else if (banderaComilla) {
+                        error="number or } expected.";
+                        break;
+                    }
+                    
+                }
+                else if (!banderaIgual) {
+                    error = "= expected.";
+                    break;
+                }
+            }
+            else if (!EsCaracter(cont)) {
+                cont++;
+                if (banderaComilla) {
+                    banderaNum=false;
+                    banderaIgual=false;
+                    banderaComilla=false;
+                }
+            }
+            else if (EsCaracter(cont)) {
+                error = "invalid char.";
+                break;
+            }
+        }
+        cont = cont +1;
         return cont;
     }
     private long ValidarParentesis(long cont, long fin, boolean banderaO, boolean banderaC) throws IOException
