@@ -9,6 +9,8 @@ import java.awt.FileDialog;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -24,6 +26,11 @@ public class Archivo
     byte[] buffer = null;
     int fila = 0, columna = 0;
     
+    long inicioExp;
+    long finExp;
+    long parentesis;
+    
+    List ListaNumeros = new ArrayList();
     public String error = "";
     
     public Archivo()
@@ -173,24 +180,49 @@ public class Archivo
         }
         
     }
-    
+    private void AgregarNumero(long num)
+    {
+        boolean NoExiste = true;
+        for (Object ListaNumero : ListaNumeros) 
+        {
+            if(ListaNumero.equals(num))
+            {
+                NoExiste = false;
+                error = "Number already taken";
+                break;
+            }
+        }
+        if(NoExiste)
+        {
+            ListaNumeros.add(num);
+        }
+    }
     public long AnalizarToken(long cont) throws IOException
     {
         String caracterA = "";
         boolean banderaNumero = false;
         boolean banderaIgual = false;
+        int tam = 0;
+        long aux;
+        long numero;
         coma: while(!caracterA.equals(";"))
         {
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
             if (Character.isDigit(caracterA.charAt(0))) //Encontrar numero
             {
+                aux = cont;
                 while(Character.isDigit(caracterA.charAt(0)))
                 {
                     cont++; 
                     Leer(nombreArchivo, 1, cont);
                     caracterA = new String(buffer).toLowerCase();
-                }                       
+                    tam++;
+                }
+                Leer(nombreArchivo, tam, aux);
+                caracterA = new String(buffer).toLowerCase();
+                numero = Long.parseLong(caracterA);
+                AgregarNumero(numero);
                 banderaNumero = true;//Se encontro el numero
             }
             else if (banderaNumero) //Buscar caracter '='
@@ -263,7 +295,20 @@ public class Archivo
                                 break;
                         }
                     }
+                    inicioExp = cont;//Sirve para validar parentesis una vez solamente
+                    finExp = flag;
+                    parentesis = ValidarParentesis(inicioExp, finExp);
                     cont = EvaluarExpresion(cont, flag);//Se evalua la expresion regular
+                    cont = ComerEspacio(cont);
+                    Leer(nombreArchivo, 1, cont);
+                    caracterA = new String(buffer).toLowerCase();
+                    if(caracterA.equals("["))
+                    {
+                        cont = TokensEspeciales(cont);
+                    }
+                    inicioExp = 0;
+                    finExp = 0;
+                    parentesis = 0;
                     break;
                 }
                 else
@@ -1128,184 +1173,221 @@ public class Archivo
         cont = cont +1;
         return cont;
     }
-    private long ValidarParentesis(long cont, long fin, boolean banderaO, boolean banderaC) throws IOException
+    private long ValidarParentesis(long cont, long fin) throws IOException
     {
-        Leer(nombreArchivo, 1, cont);
-        String caracterA = new String(buffer).toLowerCase();
-        loop: while(cont < fin)
+        long master = 0;
+        while(cont < fin)
         {
-            switch (caracterA) 
+            Leer(nombreArchivo, 1, cont);
+            String caracterA = new String(buffer).toLowerCase();
+            switch(caracterA)
             {
                 case "(":
-                    error = ") Expected";
-                    cont = ValidarParentesis(cont + 1, fin, true, false);
+                    master++;
                     break;
                 case ")":
-                    banderaC = true;
-                    if(banderaO && banderaC)
-                    {
-                        error = "";
-                        cont++;
-                        break;
-                    }
-                    else
-                    {
-                        error = "( Missing";
-                        break loop;
-                    }
+                    master--;
+                    break;
                 default:
-                    cont = ValidarParentesis(cont + 1, fin, banderaO, banderaC);
                     break;
             }
+            cont++;
         }
-        return cont;
+        return master;
     }
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
-        boolean bandera = false; //Valida que una expresion sea correcta para no volverla a evaluar
-        long inicio = cont;
-        cont = ValidarParentesis(cont, posBandera, false, false);
-        Leer(nombreArchivo, 1, cont);
-        String caracterA = new String(buffer).toLowerCase();
-        loop: while(cont < posBandera)
+        if(parentesis == 0)
         {
-            switch(caracterA)
+            boolean bandera = false; //Valida que una expresion sea correcta para no volverla a evaluar
+            long inicio = cont;
+            Leer(nombreArchivo, 1, cont);
+            String caracterA = new String(buffer).toLowerCase();
+            loop: while(cont < posBandera)
             {
-                case "|":
+                switch(caracterA)
                 {
-                    cont = EvaluarExpresion(inicio, cont);
-                    cont = EvaluarExpresion(cont + 1, posBandera);
-                    cont--;
-                    bandera = true;
-                    break;
-                }
-                case "'":
-                {
-                    Leer(nombreArchivo, 1, cont+2);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("'"))
-                    {
-                        cont = cont + 2;
-                        bandera = true;
-                    }
-                    else
-                    {
-                        error = "Closing ' expected " + cont;
-                        break loop;
-                    }
-                    break;
-                }
-                case "\"":
-                {
-                    Leer(nombreArchivo, 1, cont + 2);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("\""))
-                    {
-                        cont = cont + 2;
-                        bandera = true;
-                    }
-                    else
-                    {
-                        error = "Closing \" expected";
-                        break loop;
-                    }
-                    break;
-                }
-                case "*":
-                {
-                    if(bandera)
+                    case "|":
                     {
                         cont = EvaluarExpresion(inicio, cont);
+                        cont = EvaluarExpresion(cont + 1, posBandera);
                         cont--;
+                        bandera = true;
+                        break;
                     }
-                    else
+                    case "'":
                     {
-                        error = "Invalid regex symbol '*'";
+                        Leer(nombreArchivo, 1, cont+2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("'"))
+                        {
+                            cont = cont + 2;
+                            bandera = true;
+                        }
+                        else
+                        {
+                            error = "Closing ' expected";
+                            break loop;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case "+":
-                {
-                    cont = EvaluarExpresion(inicio, cont);
-                    Leer(nombreArchivo, 1, cont - 1);
-                    caracterA = new String(buffer).toLowerCase();
-                    if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\""))
+                    case "\"":
                     {
-                        error = "Invalid regex symbol '+'";
+                        Leer(nombreArchivo, 1, cont + 2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("\""))
+                        {
+                            cont = cont + 2;
+                            bandera = true;
+                        }
+                        else
+                        {
+                            error = "Closing \" expected";
+                            break loop;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case "?":
-                {
-                    cont = EvaluarExpresion(inicio, cont);
-                    Leer(nombreArchivo, 1, cont - 1);
-                    caracterA = new String(buffer).toLowerCase();
-                    if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\"") /*&& nombre de conjunto invalido*/)
+                    case "*":
                     {
-                        error = "Invalid regex symbol '?'";
+                        if(bandera)
+                        {
+                            cont = EvaluarExpresion(inicio, cont);
+                            cont--;
+                        }
+                        else
+                        {
+                            error = "Invalid regex symbol '*'";
+                        }
+                        break;
                     }
-                    break;
-                }
-                case "a":
-                {
-                    cont++;
-                    Leer(nombreArchivo, 7, cont);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("cciones")) 
+                    case "+":
+                    {
+                        cont = EvaluarExpresion(inicio, cont);
+                        Leer(nombreArchivo, 1, cont - 1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\""))
+                        {
+                            error = "Invalid regex symbol '+'";
+                        }
+                        break;
+                    }
+                    case "?":
+                    {
+                        cont = EvaluarExpresion(inicio, cont);
+                        Leer(nombreArchivo, 1, cont - 1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\"") /*&& nombre de conjunto invalido*/)
+                        {
+                            error = "Invalid regex symbol '?'";
+                        }
+                        break;
+                    }
+                    case "a":
+                    {
+                        cont++;
+                        Leer(nombreArchivo, 7, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("cciones")) 
+                        {
+                            Leer(nombreArchivo, 1, posBandera);
+                            String caracterBandera = new String(buffer).toLowerCase();
+                            error = "'" + caracterBandera + "'" + "expected";
+                            break loop;
+                        }
+                        break;
+                    }
+                    case "t":
+                    {
+                        Leer(nombreArchivo, 4, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("oken")) 
+                        {
+                            Leer(nombreArchivo, 1, posBandera);
+                            String caracterBandera = new String(buffer).toLowerCase();
+                            error = "'" + caracterBandera + "'" + "expected";
+                            break loop;
+                        }
+                        break;
+                    }
+                    case "[":
                     {
                         Leer(nombreArchivo, 1, posBandera);
                         String caracterBandera = new String(buffer).toLowerCase();
-                        error = "'" + caracterBandera + "'" + "expected";
+                        error = "'" + caracterBandera + "'" + " expected";
                         break loop;
                     }
-                    break;
-                }
-                case "t":
-                {
-                    Leer(nombreArchivo, 4, cont);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("oken")) 
+                    case ";":
                     {
-                        Leer(nombreArchivo, 1, posBandera);
+                        Leer(nombreArchivo, 7, posBandera);
                         String caracterBandera = new String(buffer).toLowerCase();
-                        error = "'" + caracterBandera + "'" + "expected";
+                        error = "'" + caracterBandera + "'" + " expected";
                         break loop;
                     }
-                    break;
-                }
-                case "[":
-                {
-                    Leer(nombreArchivo, 1, posBandera);
-                    String caracterBandera = new String(buffer).toLowerCase();
-                    error = "'" + caracterBandera + "'" + " expected";
-                    break loop;
-                }
-                case ";":
-                {
-                    Leer(nombreArchivo, 7, posBandera);
-                    String caracterBandera = new String(buffer).toLowerCase();
-                    error = "'" + caracterBandera + "'" + " expected";
-                    break loop;
-                }
-                case "e":
-                {
-                    Leer(nombreArchivo, 4, cont);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("rror")) 
+                    case "e":
                     {
-                        Leer(nombreArchivo, 1, posBandera);
-                        String caracterBandera = new String(buffer).toLowerCase();
-                        error = "'" + caracterBandera + "'" + "expected";
-                        break loop;
+                        Leer(nombreArchivo, 4, cont);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("rror")) 
+                        {
+                            Leer(nombreArchivo, 1, posBandera);
+                            String caracterBandera = new String(buffer).toLowerCase();
+                            error = "'" + caracterBandera + "'" + "expected";
+                            break loop;
+                        }
+                        break;
                     }
-                    break;
                 }
+                cont++;
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
             }
-            cont++;
+        }
+        else if(parentesis < 0)
+        {
+            error = "( Missing";
+        }
+        else
+        {
+            error = ") Expected";
+        }
+        return cont;
+    }
+    private long TokensEspeciales(long cont) throws IOException
+    {
+        cont = ComerEspacio(cont);
+        Leer(nombreArchivo, 1, cont);
+        String caracterA = new String(buffer).toLowerCase();
+        if(Character.isDigit(caracterA.charAt(0)))
+        {
+            error = "Invalid action name";
+        }
+        else
+        {
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
+            while(!caracterA.equals("("))
+            {
+                cont++;
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
+                if(!caracterA.equals(")"))
+                {
+                    error = ") Expected";
+                    break;
+                }
+                else
+                {
+                    cont = cont + 2;
+                }
+            }
+            cont = ComerEspacio(cont);
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
+            if(!caracterA.equals("]"))
+            {
+                error = "] Expected";
+            }
         }
-        
         return cont;
     }
 }
