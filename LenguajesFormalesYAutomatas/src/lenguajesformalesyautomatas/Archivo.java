@@ -144,6 +144,7 @@ public class Archivo
                         {
                             //seccion de error
                             cont = cont + 4;
+                            cont = AnalizarError(cont);
                             break;
                         }
                         else
@@ -849,6 +850,7 @@ public class Archivo
                 {
                     //seccion de error
                     cont =  cont+4;
+                    cont = AnalizarError(cont);
                     banderaFin=true;
                 }
                 else
@@ -1465,6 +1467,9 @@ public class Archivo
             caracterA = new String(buffer).toLowerCase();
             if (!EsCaracter(cont)) {
                 cont++;
+                if (banderaIgual && banderaNum) {
+                    
+                }
             }
             else if (caracterA.equals("=")) {
                 banderaIgual=true;
@@ -1472,8 +1477,13 @@ public class Archivo
             }
             else if (Character.isDigit(caracterA.charAt(0))) {
                 if (banderaIgual) {
-                    banderaNum=true;
-                    cont++;
+                    if (!banderaNum) {
+                        banderaNum=true;
+                        cont++;
+                    }
+                    else if (banderaNum) {
+                        
+                    }
                 }
                 else if (!banderaIgual) {
                     error="= expected.";
@@ -1481,7 +1491,17 @@ public class Archivo
                 }
             }
             else if (EsCaracter(cont)) {
-                
+                if (banderaNum) {
+                    
+                }
+                else if (!banderaNum) {
+                    error="invalid character.";
+                    break;
+                }
+                else if (!banderaIgual) {
+                    error="invalid character.";
+                    break;
+                }
             }
         }
         return cont;
