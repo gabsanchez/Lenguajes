@@ -404,6 +404,9 @@ public class Archivo
                     banderaID=false;
                     cont++;
                 }
+                else if (caracterA.equals("{")) {
+                    cont++;
+                }
                 else if (EsCaracter(cont) && !caracterA.equals("{")) {
                     error = "Invalid group name.";
                     break;
@@ -429,7 +432,7 @@ public class Archivo
         
         if (error == "") //si no hay error evaluar el contenido
         {
-            cont++;
+            //cont++;
             
             while(!caracterA.equals("}"))
             {
@@ -1468,7 +1471,8 @@ public class Archivo
             if (!EsCaracter(cont)) {
                 cont++;
                 if (banderaIgual && banderaNum) {
-                    
+                    error="End.";
+                    break;
                 }
             }
             else if (caracterA.equals("=")) {
@@ -1482,7 +1486,16 @@ public class Archivo
                         cont++;
                     }
                     else if (banderaNum) {
-                        
+                        Leer(nombreArchivo, 1, cont-1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (Character.isDigit(caracterA.charAt(0))) {
+                            cont++;
+                        }
+                        else
+                        {
+                            error="Invalid character.";
+                            break;
+                        }
                     }
                 }
                 else if (!banderaIgual) {
