@@ -815,7 +815,7 @@ public class Archivo
                         if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
                         {
                             if (banderaNombre) {
-                                error = "{ expected.";
+                                error = "( expected.";
                                 break;
                             }
                             else
@@ -826,7 +826,11 @@ public class Archivo
                         }
                         else if (Character.isLetter(caracterA.charAt(0)) && !banderaID)
                         {
-                            if (!banderaID) {
+                            if (banderaNombre) {
+                                error = "( expected.";
+                                break;
+                            }
+                            else if (!banderaID) {
                                 cont++;
                                 banderaID=true;
                             }
@@ -892,7 +896,10 @@ public class Archivo
                             break;
                         }
                     }
-                    
+                    if(!error.equals(""))
+                    {
+                        break;
+                    }
                     
                     cont = AnalizarContenidoAcciones(cont);
                     if(!error.equals(""))
@@ -910,7 +917,7 @@ public class Archivo
                     if (Character.isDigit(caracterA.charAt(0)) && !banderaID)
                     {
                         if (banderaNombre) {
-                            error = "{ expected.";
+                            error = "( expected.";
                             break;
                         }
                         else
@@ -921,10 +928,15 @@ public class Archivo
                     }
                     else if (Character.isLetter(caracterA.charAt(0)) && !banderaID)
                     {
-                        if (!banderaID) {
+                        if (banderaNombre) {
+                            error = "( expected.";
+                            break;
+                        }
+                        else if (!banderaID) {
                             cont++;
                             banderaID=true;
                         }
+                        
                     } 
                     else if (banderaID) 
                     {
@@ -987,7 +999,10 @@ public class Archivo
                         break;
                     }
                 }
-                
+                if(!error.equals(""))
+                {
+                    break;
+                }
                 cont = AnalizarContenidoAcciones(cont);
                 if(!error.equals(""))
                 {
