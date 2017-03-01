@@ -197,10 +197,6 @@ public class Archivo
                     break;
                 }
             }
-            else if (!banderaInicial) {
-                error = "TOKENS expected.";
-                break;
-            }
             else
             {
                 cont++;
@@ -1081,7 +1077,6 @@ public class Archivo
                     banderaNombre =false;
                     banderaParentesis=false;
                     Accion="";
-                    
                 }
             }
             else if (EsCaracter(cont)) {
@@ -1205,10 +1200,32 @@ public class Archivo
                 banderaNombre =false;
                 banderaParentesis=false;
                 Accion="";
-                
             }
         }
+        //Vaidar si las acciones definidas en los tokens si estan
+        ValidarAcciones();
         return cont;
+    }
+    
+    public void ValidarAcciones()
+    {
+        boolean Existe=false;
+        for (int i = 0; i < AccionesTokens.size(); i++) 
+        {
+            for (int j = 0; j < Acciones.size(); j++) 
+            {
+                if (AccionesTokens.get(i).equals(Acciones.get(j))) 
+                {
+                    Existe=true;
+                    break;
+                }
+            }
+            if (!Existe) 
+            {
+                error="Undefined action:"+AccionesTokens.get(i);
+                break;
+            }
+        }
     }
     
     public long AnalizarContenidoAcciones(long cont) throws IOException
