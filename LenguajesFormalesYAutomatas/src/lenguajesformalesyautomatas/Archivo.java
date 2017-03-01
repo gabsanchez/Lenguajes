@@ -1132,7 +1132,31 @@ public class Archivo
                             banderaID=false;
                             cont++;
                         }
-                        else if (EsCaracter(cont) && !caracterA.equals("{")) 
+                        else if (caracterA.equals("(")) {
+                            banderaNombre=true;
+                            banderaID=false;
+                            if (banderaNombre) {
+                                Leer(nombreArchivo, 1, cont+1);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals(")")) {
+                                cont=cont+2;
+                                banderaParentesis = true;
+                            }
+                            else
+                            {
+                                CalcularFilaColumna(cont);
+                                error = ") expected. Fila: " + filaError + " Columna: " + columnaError;
+                                break;
+                            }
+                            }
+                            else
+                            {
+                                CalcularFilaColumna(cont);
+                                error = "( expected. Fila: " + filaError + " Columna: " + columnaError;
+                                break;
+                            }
+                        }
+                        else if (EsCaracter(cont) && !caracterA.equals("(")) 
                         {
                             CalcularFilaColumna(cont);
                             error = "Invalid action name. Fila: " + filaError + " Columna: " + columnaError;
@@ -1201,7 +1225,9 @@ public class Archivo
             }
         }
         //Vaidar si las acciones definidas en los tokens si estan
-        ValidarAcciones();
+        if (error.equals("")||error.equals("File read successfully.")) {
+            ValidarAcciones();
+        }
         return cont;
     }
     
@@ -1220,7 +1246,7 @@ public class Archivo
             }
             if (!Existe) 
             {
-                error="Undefined action:"+AccionesTokens.get(i);
+                error="Undefined action: "+AccionesTokens.get(i);
                 break;
             }
         }
