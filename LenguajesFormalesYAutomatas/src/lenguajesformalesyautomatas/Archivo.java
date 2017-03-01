@@ -67,7 +67,7 @@ public class Archivo
             columnaError++;
             Leer(nombreArchivo, 1, aux);
             String caracterA = new String(buffer).toLowerCase();
-            if(caracterA.equals("/n"))
+            if(caracterA.equals("\n"))
             {
                 filaError++;
                 columnaError = 0;
@@ -1435,7 +1435,6 @@ public class Archivo
                         if (caracterA.equals("'"))
                         {
                             cont = cont + 2;
-                            bandera = true;
                         }
                         else
                         {
@@ -1451,7 +1450,6 @@ public class Archivo
                         if (caracterA.equals("\""))
                         {
                             cont = cont + 2;
-                            bandera = true;
                         }
                         else
                         {
@@ -1476,23 +1474,29 @@ public class Archivo
                     }
                     case "+":
                     {
-                        cont = EvaluarExpresion(inicio, cont);
-                        Leer(nombreArchivo, 1, cont - 1);
-                        caracterA = new String(buffer).toLowerCase();
-                        if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\""))
+                        if(bandera)
                         {
-                            error = "Invalid regex symbol '+'";
+                            cont = EvaluarExpresion(inicio, cont);
+                            //cont--;
+                        }
+                        else
+                        {
+                            error = "Invalid regex symbol '*'";
+                            break loop;
                         }
                         break;
                     }
                     case "?":
                     {
-                        cont = EvaluarExpresion(inicio, cont);
-                        Leer(nombreArchivo, 1, cont - 1);
-                        caracterA = new String(buffer).toLowerCase();
-                        if(!caracterA.equals(")") && !caracterA.equals("'") && !caracterA.equals("\"") /*&& nombre de conjunto invalido*/)
+                        if(bandera)
                         {
-                            error = "Invalid regex symbol '?'";
+                            cont = EvaluarExpresion(inicio, cont);
+                            //cont--;
+                        }
+                        else
+                        {
+                            error = "Invalid regex symbol '*'";
+                            break loop;
                         }
                         break;
                     }
@@ -1599,7 +1603,7 @@ public class Archivo
                     caracterA = new String(buffer).toLowerCase();
                     if(caracterA.equals(")"))
                     {
-                        cont = cont + 2;
+                        cont++;
                         break;
                     }
                     else
@@ -1618,7 +1622,8 @@ public class Archivo
             caracterA = new String(buffer).toLowerCase();
             if(!caracterA.equals("]"))
             {
-                error = "] Expected";
+                CalcularFilaColumna(cont);
+                error = "] Expected. Fila: " + filaError + " Columna: " + columnaError;
             }
         }
         return cont;
@@ -1627,7 +1632,7 @@ public class Archivo
     public long AnalizarError(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
-        String caracterA = new String(buffer).toLowerCase();
+        String caracterA;
         boolean banderaFinal=false,banderaIgual=false, banderaNum=false;
         String Token = "";
         while(!banderaFinal)
