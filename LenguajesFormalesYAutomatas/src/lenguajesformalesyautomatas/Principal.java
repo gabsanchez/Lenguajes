@@ -73,7 +73,7 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "File read correctly");
             else
             {
-                JOptionPane.showMessageDialog(rootPane, entrada.error +"\nFila: "+ entrada.fila +" Columna: "+ entrada.columna);
+                JOptionPane.showMessageDialog(rootPane, entrada.error);
             }
         } 
         catch (IOException ex) 
