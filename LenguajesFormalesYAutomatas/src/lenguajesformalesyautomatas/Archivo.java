@@ -79,7 +79,7 @@ public class Archivo
                 {
                     Leer(nombreArchivo, 5, cont);
                     caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("oken "))
+                    if (caracterA.equals("oken ")||caracterA.equals("oken\n")||caracterA.equals("oken\t"))
                     {
                         cont = cont + 5;
                         cont = AnalizarToken(cont);
@@ -88,10 +88,7 @@ public class Archivo
                             break;
                         }
                     }
-                }
-                else
-                {
-                    if(banderaInicial)
+                    else
                     {
                         //es conjunto
                         cont = AnalizarConjunto(cont);
@@ -100,11 +97,11 @@ public class Archivo
                             break;
                         }
                     }
-                    else
-                    {
-                        error = "TOKENS expected.";
-                        break;
-                    }
+                }
+                else
+                {
+                    error = "TOKENS expected.";
+                    break;
                 }
             }
             else if(cont == tamArchivo)
@@ -176,6 +173,10 @@ public class Archivo
                     error = "TOKENS expected.";
                     break;
                 }
+            }
+            else if (!banderaInicial) {
+                error = "TOKENS expected.";
+                break;
             }
             else
             {
