@@ -64,6 +64,7 @@ public class Archivo
         {
             Leer(nombreArchivo, 1, cont);
             String caracterA = new String(buffer).toLowerCase();
+            
             if(caracterA.equals("t"))
             {
                 cont++;
@@ -145,7 +146,10 @@ public class Archivo
                             //seccion de error
                             cont = cont + 4;
                             cont = AnalizarError(cont);
-                            break;
+                            if(!error.equals(""))
+                            {
+                                break;
+                            }
                         }
                         else
                         {
@@ -439,7 +443,7 @@ public class Archivo
             }
         }
         
-        if (error == "") //si no hay error evaluar el contenido
+        if (error.equals("")) //si no hay error evaluar el contenido
         {
             //cont++;
             
@@ -1221,7 +1225,13 @@ public class Archivo
                     banderaNum=false;
                     banderaIgual=false;
                     banderaComilla=false;
-                    Token="";
+                    if (!ListaNumeros.contains(Token)) {
+                        ListaNumeros.add(Token);
+                        Token="";
+                    }
+                    else if (ListaNumeros.contains(Token)) {
+                        error="Token id already taken.";
+                    }
                 }
             }
             else if (EsCaracter(cont)) {
@@ -1235,7 +1245,13 @@ public class Archivo
                         banderaNum=false;
                         banderaIgual=false;
                         banderaComilla=false;
-                        Token="";
+                        if (!ListaNumeros.contains(Token)) {
+                            ListaNumeros.add(Token);
+                            Token="";
+                        }
+                        else if (ListaNumeros.contains(Token)) {
+                            error="Token id already taken.";
+                        }
                     }
                     if (banderaComilla || banderaIgual || banderaNum) 
                     {
@@ -1477,6 +1493,7 @@ public class Archivo
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         boolean banderaFinal=false,banderaIgual=false, banderaNum=false;
+        String Token = "";
         while(!banderaFinal)
         {
             Leer(nombreArchivo, 1, cont);
@@ -1484,17 +1501,31 @@ public class Archivo
             if (!EsCaracter(cont)) {
                 cont++;
                 if (banderaIgual && banderaNum) {
-                    error="End.";
-                    break;
+                    if (!ListaNumeros.contains(Token)) {
+                        ListaNumeros.add(Token);
+                        Token="";
+                        error="End.";
+                        break;
+                    }
+                    else if (ListaNumeros.contains(Token)) {
+                        error="Token id already taken.";
+                    }
                 }
             }
             else if (caracterA.equals("=")) {
-                banderaIgual=true;
-                cont++;
+                if (!banderaIgual) {
+                    banderaIgual=true;
+                    cont++;
+                }
+                else if (banderaIgual) {
+                    error = "Number expected.";
+                    break;
+                }
             }
             else if (Character.isDigit(caracterA.charAt(0))) {
                 if (banderaIgual) {
                     if (!banderaNum) {
+                        Token=Token+caracterA;
                         banderaNum=true;
                         cont++;
                     }
@@ -1502,6 +1533,9 @@ public class Archivo
                         Leer(nombreArchivo, 1, cont-1);
                         caracterA = new String(buffer).toLowerCase();
                         if (Character.isDigit(caracterA.charAt(0))) {
+                            Leer(nombreArchivo, 1, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            Token=Token+caracterA;
                             cont++;
                         }
                         else
@@ -1517,15 +1551,12 @@ public class Archivo
                 }
             }
             else if (EsCaracter(cont)) {
-                if (banderaNum) {
-                    
-                }
-                else if (!banderaNum) {
-                    error="invalid character.";
+                if (!banderaNum) {
+                    error="Invalid character.";
                     break;
                 }
                 else if (!banderaIgual) {
-                    error="invalid character.";
+                    error="Invalid character.";
                     break;
                 }
             }
