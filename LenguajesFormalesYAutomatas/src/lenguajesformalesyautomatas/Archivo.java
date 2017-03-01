@@ -733,7 +733,7 @@ public class Archivo
                             {
                                 return cont;
                             }
-                            contElementos++;
+                            
                         }
                         else
                         {
