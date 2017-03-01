@@ -238,14 +238,12 @@ public class Archivo
             if(nombre.equals(iden))
             {
                 NoExiste = false;
-                CalcularFilaColumna(cont);
-                error = "ID already taken. Fila: " + filaError + " Columna: " + columnaError;
                 break;
             }
         }
         if(NoExiste)
         {
-            ListaNumeros.add(iden);
+            AccionesTokens.add(iden);
         }
     }
     public long AnalizarToken(long cont) throws IOException
@@ -1296,14 +1294,18 @@ public class Archivo
                         }
                         cont++;
                     }
-                    else if (banderaComilla) {
-                        error="number or } expected.";
+                    else if (banderaComilla) 
+                    {
+                        CalcularFilaColumna(cont);
+                        error = "number or } expected. Fila: " + filaError + " Columna: " + columnaError;
                         break;
                     }
                     
                 }
-                else if (!banderaIgual) {
-                    error = "= expected.";
+                else if (!banderaIgual) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "= expected. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
             }
@@ -1321,21 +1323,27 @@ public class Archivo
                             if (!caracterA.equals("\"")) {
                                 cont++;
                             }
-                            else if (caracterA.equals("")) {
-                                error="\" expected.";
+                            else if (caracterA.equals("")) 
+                            {
+                                CalcularFilaColumna(cont);
+                                error = "\" expected. Fila: " + filaError + " Columna: " + columnaError;
                                 break;
                             }
                         }
                         cont++;
                     }
-                    else if (banderaComilla) {
-                        error="number or } expected.";
+                    else if (banderaComilla) 
+                    {
+                        CalcularFilaColumna(cont);
+                        error = "number or } expected. Fila: " + filaError + " Columna: " + columnaError;
                         break;
                     }
                     
                 }
-                else if (!banderaIgual) {
-                    error = "= expected.";
+                else if (!banderaIgual) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "= expected. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
             }
@@ -1349,14 +1357,19 @@ public class Archivo
                         ListaNumeros.add(Token);
                         Token="";
                     }
-                    else if (ListaNumeros.contains(Token)) {
-                        error="Token id already taken.";
+                    else if (ListaNumeros.contains(Token)) 
+                    {
+                        CalcularFilaColumna(cont);
+                        error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
                     }
                 }
             }
-            else if (EsCaracter(cont)) {
-                if (!caracterA.equals("}")) {
-                    error = "Invalid char.";
+            else if (EsCaracter(cont))
+            {
+                if (!caracterA.equals("}")) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "Invalid char. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
                 else if(caracterA.equals("}"))
@@ -1369,13 +1382,16 @@ public class Archivo
                             ListaNumeros.add(Token);
                             Token="";
                         }
-                        else if (ListaNumeros.contains(Token)) {
-                            error="Token id already taken.";
+                        else if (ListaNumeros.contains(Token)) 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
                         }
                     }
                     if (banderaComilla || banderaIgual || banderaNum) 
                     {
-                        error = "Invalid char.";
+                        CalcularFilaColumna(cont);
+                        error = "Invalid char. Fila: " + filaError + " Columna: " + columnaError;
                         break;
                     }
                 }
@@ -1404,6 +1420,16 @@ public class Archivo
                     break;
             }
             cont++;
+        }
+        if(parentesis < 0)
+        {
+            CalcularFilaColumna(cont);
+            error = "( Missing. Fila: " + filaError + " Columna: " + columnaError;
+        }
+        else if(parentesis > 0)
+        {
+            CalcularFilaColumna(cont);
+            error = ") Expected. Fila: " + filaError + " Columna: " + columnaError;
         }
         return master;
     }
@@ -1438,7 +1464,8 @@ public class Archivo
                         }
                         else
                         {
-                            error = "Closing ' expected";
+                            CalcularFilaColumna(cont);
+                            error = "Closing ' expected. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1453,7 +1480,8 @@ public class Archivo
                         }
                         else
                         {
-                            error = "Closing \" expected";
+                            CalcularFilaColumna(cont);
+                            error = "Closing \" expected. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1467,7 +1495,8 @@ public class Archivo
                         }
                         else
                         {
-                            error = "Invalid regex symbol '*'";
+                            CalcularFilaColumna(cont);
+                            error = "Invalid regex symbol '*'. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1481,7 +1510,8 @@ public class Archivo
                         }
                         else
                         {
-                            error = "Invalid regex symbol '*'";
+                            CalcularFilaColumna(cont);
+                            error = "Invalid regex symbol '+'. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1495,7 +1525,8 @@ public class Archivo
                         }
                         else
                         {
-                            error = "Invalid regex symbol '*'";
+                            CalcularFilaColumna(cont);
+                            error = "Invalid regex symbol '?'. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1509,7 +1540,8 @@ public class Archivo
                         {
                             Leer(nombreArchivo, 1, posBandera);
                             String caracterBandera = new String(buffer).toLowerCase();
-                            error = "'" + caracterBandera + "'" + "expected";
+                            CalcularFilaColumna(cont);
+                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1522,7 +1554,8 @@ public class Archivo
                         {
                             Leer(nombreArchivo, 1, posBandera);
                             String caracterBandera = new String(buffer).toLowerCase();
-                            error = "'" + caracterBandera + "'" + "expected";
+                            CalcularFilaColumna(cont);
+                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1531,14 +1564,16 @@ public class Archivo
                     {
                         Leer(nombreArchivo, 1, posBandera);
                         String caracterBandera = new String(buffer).toLowerCase();
-                        error = "'" + caracterBandera + "'" + " expected";
+                        CalcularFilaColumna(cont);
+                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                         break loop;
                     }
                     case ";":
                     {
                         Leer(nombreArchivo, 7, posBandera);
                         String caracterBandera = new String(buffer).toLowerCase();
-                        error = "'" + caracterBandera + "'" + " expected";
+                        CalcularFilaColumna(cont);
+                        error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                         break loop;
                     }
                     case "e":
@@ -1549,7 +1584,8 @@ public class Archivo
                         {
                             Leer(nombreArchivo, 1, posBandera);
                             String caracterBandera = new String(buffer).toLowerCase();
-                            error = "'" + caracterBandera + "'" + "expected";
+                            CalcularFilaColumna(cont);
+                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                             break loop;
                         }
                         break;
@@ -1563,14 +1599,6 @@ public class Archivo
                 caracterA = new String(buffer).toLowerCase();
             }
         }
-        else if(parentesis < 0)
-        {
-            error = "( Missing";
-        }
-        else
-        {
-            error = ") Expected";
-        }
         return cont;
     }
     private long TokensEspeciales(long cont) throws IOException
@@ -1583,16 +1611,17 @@ public class Archivo
         String caracterA = new String(buffer).toLowerCase();
         if(Character.isDigit(caracterA.charAt(0)))
         {
-            error = "Invalid action name";
+            CalcularFilaColumna(cont);
+            error = "Invalid action name. Fila: " + filaError + " Columna: " + columnaError;
         }
         else
         {
-            aux = cont;
+            aux = cont + 1;
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
             while(!caracterA.equals("("))
             {
-                tam++;
+                
                 cont++;
                 Leer(nombreArchivo, 1, cont);
                 caracterA = new String(buffer).toLowerCase();
@@ -1608,10 +1637,12 @@ public class Archivo
                     }
                     else
                     {
-                        error = ") Expected";
+                        CalcularFilaColumna(cont);
+                        error = ") Expected. Fila: " + filaError + " Columna: " + columnaError;
                         break;
                     }
                 }
+                tam++;
             }
             
             Leer(nombreArchivo, tam, aux);
@@ -1644,12 +1675,13 @@ public class Archivo
                 if (banderaIgual && banderaNum) {
                     if (!ListaNumeros.contains(Token)) {
                         ListaNumeros.add(Token);
-                        Token="";
-                        error="End.";
+                        error="File read successfully.";
                         break;
                     }
-                    else if (ListaNumeros.contains(Token)) {
-                        error="Token id already taken.";
+                    else if (ListaNumeros.contains(Token)) 
+                    {
+                        CalcularFilaColumna(cont);
+                        error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
                     }
                 }
             }
@@ -1658,8 +1690,10 @@ public class Archivo
                     banderaIgual=true;
                     cont++;
                 }
-                else if (banderaIgual) {
-                    error = "Number expected.";
+                else if (banderaIgual) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "Number expected. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
             }
@@ -1673,7 +1707,8 @@ public class Archivo
                     else if (banderaNum) {
                         Leer(nombreArchivo, 1, cont-1);
                         caracterA = new String(buffer).toLowerCase();
-                        if (Character.isDigit(caracterA.charAt(0))) {
+                        if (Character.isDigit(caracterA.charAt(0))) 
+                        {
                             Leer(nombreArchivo, 1, cont);
                             caracterA = new String(buffer).toLowerCase();
                             Token=Token+caracterA;
@@ -1681,23 +1716,31 @@ public class Archivo
                         }
                         else
                         {
-                            error="Invalid character.";
+                            CalcularFilaColumna(cont);
+                            error = "Invalid character. Fila: " + filaError + " Columna: " + columnaError;
                             break;
                         }
                     }
                 }
-                else if (!banderaIgual) {
-                    error="= expected.";
+                else if (!banderaIgual) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "'=' Expected. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
             }
-            else if (EsCaracter(cont)) {
-                if (!banderaNum) {
-                    error="Invalid character.";
+            else if (EsCaracter(cont)) 
+            {
+                if (!banderaNum) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "Invalid character. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
-                else if (!banderaIgual) {
-                    error="Invalid character.";
+                else if (!banderaIgual) 
+                {
+                    CalcularFilaColumna(cont);
+                    error = "Invalid character. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
             }
