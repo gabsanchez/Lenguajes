@@ -37,6 +37,7 @@ public class Archivo
     List Acciones = new ArrayList();
     List AccionesTokens = new ArrayList();
     
+    List ConjuntosLlamados = new ArrayList();
     public Archivo()
     {
         fd = new FileDialog(form, "Abrir archivo", FileDialog.LOAD);
@@ -226,7 +227,7 @@ public class Archivo
             ListaNumeros.add(num);
         }
     }
-    private void AgregarIDToken(String iden, long cont) throws IOException
+    private void AgregarIDToken(String iden) throws IOException
     {
         boolean NoExiste = true;
         for (Object nombre : AccionesTokens) 
@@ -265,9 +266,12 @@ public class Archivo
                     tam++;
                 }
                 Leer(nombreArchivo, tam, aux);
-                caracterA = new String(buffer).toLowerCase();
-                numero = Long.parseLong(caracterA);
+                String auxiliar = new String(buffer).toLowerCase();
+                numero = Long.parseLong(auxiliar);
                 AgregarNumero(numero,cont);
+                
+                Leer(nombreArchivo, 1, cont);
+                caracterA = new String(buffer).toLowerCase();
                 banderaNumero = true;//Se encontro el numero
             }
             else if (banderaNumero) //Buscar caracter '='
@@ -289,9 +293,6 @@ public class Archivo
                     OUTER:
                     while (!caracterA.equals(";")) 
                     {
-                        flag++;    
-                        Leer(nombreArchivo, 1, flag);
-                        caracterA = new String(buffer).toLowerCase();
                         switch (caracterA) 
                         {
                             case "a":
@@ -342,6 +343,9 @@ public class Archivo
                             default:
                                 break;
                         }
+                        flag++;
+                        Leer(nombreArchivo, 1, flag);
+                        caracterA = new String(buffer).toLowerCase();
                     }
                     inicioExp = cont;//Sirve para validar parentesis una vez solamente
                     finExp = flag;
@@ -1476,7 +1480,7 @@ public class Archivo
         }
         return master;
     }
-    
+    boolean EsCon;
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
         if(parentesis == 0)
@@ -1494,7 +1498,6 @@ public class Archivo
                         cont = EvaluarExpresion(inicio, cont);
                         cont = EvaluarExpresion(cont + 1, posBandera);
                         cont--;
-                        bandera = true;
                         break;
                     }
                     case "'":
@@ -1574,35 +1577,6 @@ public class Archivo
                         }
                         break;
                     }
-                    case "a":
-                    {
-                        cont++;
-                        Leer(nombreArchivo, 7, cont);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("cciones")) 
-                        {
-                            Leer(nombreArchivo, 1, posBandera);
-                            String caracterBandera = new String(buffer).toLowerCase();
-                            CalcularFilaColumna(cont);
-                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
-                            break loop;
-                        }
-                        break;
-                    }
-                    case "t":
-                    {
-                        Leer(nombreArchivo, 4, cont);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("oken")) 
-                        {
-                            Leer(nombreArchivo, 1, posBandera);
-                            String caracterBandera = new String(buffer).toLowerCase();
-                            CalcularFilaColumna(cont);
-                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
-                            break loop;
-                        }
-                        break;
-                    }
                     case "[":
                     {
                         Leer(nombreArchivo, 1, posBandera);
@@ -1619,22 +1593,95 @@ public class Archivo
                         error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
                         break loop;
                     }
-                    case "e":
-                    {
-                        Leer(nombreArchivo, 4, cont);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("rror")) 
-                        {
-                            Leer(nombreArchivo, 1, posBandera);
-                            String caracterBandera = new String(buffer).toLowerCase();
-                            CalcularFilaColumna(cont);
-                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
-                            break loop;
-                        }
-                        break;
-                    }
                     default:
-                        break;
+                    {
+                        long aux = cont;
+                        int tam = 0;
+                        if(Character.isLetter(caracterA.charAt(0)))
+                        {
+                            while(cont < posBandera)
+                            {
+                                switch(caracterA)
+                                {
+                                    case "a":
+                                    {
+                                        cont++;
+                                        Leer(nombreArchivo, 7, cont);
+                                        caracterA = new String(buffer).toLowerCase();
+                                        if (caracterA.equals("cciones")) 
+                                        {
+                                            Leer(nombreArchivo, 1, posBandera);
+                                            String caracterBandera = new String(buffer).toLowerCase();
+                                            CalcularFilaColumna(cont);
+                                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
+                                            break loop;
+                                        }
+                                        else
+                                        {
+                                            tam++;
+                                        }
+                                        break;
+                                    }
+                                    case "t":
+                                    {
+                                        cont++;
+                                        Leer(nombreArchivo, 4, cont);
+                                        caracterA = new String(buffer).toLowerCase();
+                                        if (caracterA.equals("oken")) 
+                                        {
+                                            Leer(nombreArchivo, 1, posBandera);
+                                            String caracterBandera = new String(buffer).toLowerCase();
+                                            CalcularFilaColumna(cont);
+                                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
+                                            break loop;
+                                        }
+                                        else
+                                        {
+                                            tam++;
+                                        }
+                                        break;
+                                    }
+                                    case "e":
+                                    {
+                                        cont++;
+                                        Leer(nombreArchivo, 4, cont);
+                                        caracterA = new String(buffer).toLowerCase();
+                                        if (caracterA.equals("rror")) 
+                                        {
+                                            Leer(nombreArchivo, 1, posBandera);
+                                            String caracterBandera = new String(buffer).toLowerCase();
+                                            CalcularFilaColumna(cont);
+                                            error = "'" + caracterBandera + "'" + "expected. Fila: " + filaError + " Columna: " + columnaError;
+                                            break loop;
+                                        }
+                                        else
+                                        {
+                                            tam++;
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                    {
+                                        cont++;
+                                        Leer(nombreArchivo, 1, cont);
+                                        caracterA = new String(buffer).toLowerCase();
+                                        while(Character.isLetter(caracterA.charAt(0)) || Character.isDigit(caracterA.charAt(0)))
+                                        {
+                                            cont++;
+                                            Leer(nombreArchivo, 1, cont);
+                                            caracterA = new String(buffer).toLowerCase();
+                                            tam++;
+                                        }
+                                        String conjunto;
+                                        Leer(nombreArchivo, tam, aux);
+                                        conjunto = new String(buffer).toLowerCase();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                        
                 }
                 bandera = true;
                 cont++;
@@ -1643,6 +1690,22 @@ public class Archivo
             }
         }
         return cont;
+    }
+    private void GuardarConjuntoEXP(String nombre) throws IOException
+    {
+        boolean NoExiste = true;
+        for (Object conjunto : ConjuntosLlamados) 
+        {
+            if(conjunto.equals(nombre))
+            {
+                NoExiste = false;
+                break;
+            }
+        }
+        if(NoExiste)
+        {
+            AccionesTokens.add(nombre);
+        }
     }
     private long TokensEspeciales(long cont) throws IOException
     {
@@ -1690,7 +1753,7 @@ public class Archivo
             
             Leer(nombreArchivo, tam, aux);
             nombre = new String(buffer).toLowerCase();
-            AgregarIDToken(nombre, cont);
+            AgregarIDToken(nombre);
             cont = ComerEspacio(cont);
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
