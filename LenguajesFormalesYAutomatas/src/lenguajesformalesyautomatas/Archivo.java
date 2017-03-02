@@ -82,13 +82,11 @@ public class Archivo
         long cont = 0;
         boolean banderaInicial = false; //Determina cuando llegamos al inicio de lo que nos interesa.
         boolean banderaFinal = false;
-        while(!banderaFinal)
-        {
+        OUTER:
+        while (!banderaFinal) {
             Leer(nombreArchivo, 1, cont);
             String caracterA = new String(buffer).toLowerCase();
-            
-            if(caracterA.equals("t"))
-            {
+            if (caracterA.equals("t")) {
                 cont++;
                 Leer(nombreArchivo, 5, cont);
                 caracterA = new String(buffer).toLowerCase();
@@ -125,81 +123,83 @@ public class Archivo
                     error = "TOKENS expected.";
                     break;
                 }
-            }
-            else if(cont == tamArchivo)
+            } 
+            else if (cont == tamArchivo) 
             {
                 CalcularFilaColumna(cont);
                 error = "TOKENS expected. Fila: " + filaError + " Columna: " + columnaError;
                 break;
-            }
-            else if(EsCaracter(cont))
+            } 
+            else if (EsCaracter(cont)) 
             {
                 if (banderaInicial) 
                 {
-                    if (caracterA.equals("a")) {
-                        cont++;
-                        Leer(nombreArchivo, 7, cont);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("cciones"))
+                    switch (caracterA) 
+                    {
+                        case "a":
                         {
-                            //seccion de acciones
-                            cont = cont + 7;
-                            cont = AnalizarAcciones(cont);
+                            cont++;
+                            Leer(nombreArchivo, 7, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("cciones")) 
+                            {
+                                //seccion de acciones
+                                cont = cont + 7;
+                                cont = AnalizarAcciones(cont);
+                            } 
+                            else 
+                            {
+                                //Es conjunto
+                                cont = AnalizarConjunto(cont);
+                                if (!error.equals("")) {
+                                    break OUTER;
+                                }
+                            }
+                            break;
                         }
-                        else
+                        case "e":
+                        {
+                            cont++;
+                            Leer(nombreArchivo, 4, cont);
+                            caracterA = new String(buffer).toLowerCase();
+                            if (caracterA.equals("rror")) 
+                            {
+                                //seccion de error
+                                cont = cont + 4;
+                                cont = AnalizarError(cont);
+                                if (!error.equals("")) 
+                                {
+                                    break OUTER;
+                                }
+                            }
+                            else 
+                            {
+                                //Es conjunto
+                                cont = AnalizarConjunto(cont);
+                                if (!error.equals("")) 
+                                {
+                                    break OUTER;
+                                }
+                            }
+                            break;
+                        }
+                        default:
                         {
                             //Es conjunto
                             cont = AnalizarConjunto(cont);
-                            if(!error.equals(""))
+                            if (!error.equals("")) 
                             {
-                                break;
+                                break OUTER;
                             }
-                        }
-                    }
-                    else if (caracterA.equals("e")) 
-                    {
-                        cont++;
-                        Leer(nombreArchivo, 4, cont);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("rror"))
-                        {
-                            //seccion de error
-                            cont = cont + 4;
-                            cont = AnalizarError(cont);
-                            if(!error.equals(""))
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            //Es conjunto
-                            cont = AnalizarConjunto(cont);
-                            if(!error.equals(""))
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Es conjunto
-                        cont = AnalizarConjunto(cont);
-                        if(!error.equals(""))
-                        {
                             break;
                         }
                     }
-                }
-                else
-                {
+                } else {
                     CalcularFilaColumna(cont);
                     error = "TOKENS expected. Fila: " + filaError + " Columna: " + columnaError;
                     break;
                 }
-            }
-            else
-            {
+            } else {
                 cont++;
             }
             if(!error.equals(""))
@@ -501,114 +501,116 @@ public class Archivo
         
         if (error.equals("")) //si no hay error evaluar el contenido
         {
-            //cont++;
-            
-            while(!caracterA.equals("}"))
-            {
+            OUTER:
+            while (!caracterA.equals("}")) {
                 Leer(nombreArchivo, 1, cont);
                 caracterA = new String(buffer).toLowerCase();
-                if (caracterA.equals("'")) 
+                switch (caracterA) 
                 {
-                    Leer(nombreArchivo, 1, cont+2);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("'")) {
-                        cont = cont+3;
-                        contElementos++;
-                    }
-                    else
+                    case "'":
                     {
-                        CalcularFilaColumna(cont);
-                        error = "' expected. Fila: " + filaError + " Columna: " + columnaError;
-                        break;
-                    }
-                }
-                else if (caracterA.equals("\"")) 
-                {
-                    Leer(nombreArchivo, 1, cont+2);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("\"")) 
-                    {
-                        cont = cont+3;
-                        contElementos++;
-                    }
-                    else
-                    {
-                        CalcularFilaColumna(cont);
-                        error = "\" expected. Fila: " + filaError + " Columna: " + columnaError;
-                        break;
-                    }
-                }
-                else if (caracterA.equals(".")) 
-                {
-                    Leer(nombreArchivo, 1, cont+1);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals(".")) 
-                    {
-                        //Buscar elemento siguiente y anterior.
-                        cont = AnalizarRango(cont);
-                        if(!error.equals(""))
+                        Leer(nombreArchivo, 1, cont+2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("'")) 
                         {
-                            break;
-                        }
-                        contElementos++;
-                    }
-                    else
-                    {
-                        CalcularFilaColumna(cont);
-                        error = ". expected. Fila: " + filaError + " Columna: " + columnaError;
-                        break;
-                    }
-                }
-                else if (caracterA.equals("c")) 
-                {
-                    Leer(nombreArchivo, 2, cont+1);
-                    caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("hr"))
-                    {
-                        cont = cont+3;
-                        //es un chr
-                        cont = AnalizarCHR(cont);
-                        if(!error.equals(""))
-                        {
-                            break;
-                        }
-                        contElementos++;
-                    }
-                    else
-                    {
-                        CalcularFilaColumna(cont);
-                        error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
-                        break;
-                    }
-                }
-                else
-                {
-                    if(!EsCaracter(cont)) 
-                    {
-                        cont = ComerEspacio(cont);
-                    }
-                    else if (caracterA.equals("+"))
-                    {
-                        if (contElementos == 1) {
-                            cont++;
-                            contElementos--;
-                        }
-                        else
+                            cont = cont+3;
+                            contElementos++;
+                        } 
+                        else 
                         {
                             CalcularFilaColumna(cont);
-                            error = "Bad use of +. Fila: " + filaError + " Columna: " + columnaError;
-                            break;
+                            error = "' expected. Fila: " + filaError + " Columna: " + columnaError;
+                            break OUTER;
                         }
-                    }
-                    else if(EsCaracter(cont)&&!caracterA.equals("}"))
-                    {
-                        CalcularFilaColumna(cont);
-                        error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
                         break;
                     }
-
+                    case "\"":
+                    {
+                        Leer(nombreArchivo, 1, cont+2);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("\""))
+                        {
+                            cont = cont+3;
+                            contElementos++;
+                        } 
+                        else 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "\" expected. Fila: " + filaError + " Columna: " + columnaError;
+                            break OUTER;
+                        }
+                        break;
+                    }
+                    case ".":
+                        Leer(nombreArchivo, 1, cont+1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals(".")) 
+                        {
+                            //Buscar elemento siguiente y anterior.
+                            cont = AnalizarRango(cont);
+                            if (!error.equals("")) 
+                            {
+                                break OUTER;
+                            }
+                            contElementos++;
+                        } 
+                        else 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = ". expected. Fila: " + filaError + " Columna: " + columnaError;
+                            break OUTER;
+                        }
+                        break;
+                    case "c":
+                    {
+                        Leer(nombreArchivo, 2, cont+1);
+                        caracterA = new String(buffer).toLowerCase();
+                        if (caracterA.equals("hr")) 
+                        {
+                            cont = cont+3;
+                            //es un chr
+                            cont = AnalizarCHR(cont);
+                            if (!error.equals("")) 
+                            {
+                                break OUTER;
+                            }
+                            contElementos++;
+                        } 
+                        else 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
+                            break OUTER;
+                        }
+                        break;
+                    }
+                    default:
+                        if (!EsCaracter(cont)) 
+                        {
+                            cont = ComerEspacio(cont);
+                        } 
+                        else if (caracterA.equals("+")) 
+                        {
+                            if (contElementos == 1) 
+                            {
+                                cont++;
+                                contElementos--;
+                            } 
+                            else 
+                            {
+                                CalcularFilaColumna(cont);
+                                error = "Bad use of +. Fila: " + filaError + " Columna: " + columnaError;
+                                break OUTER;
+                            }
+                        } 
+                        else if (EsCaracter(cont)&&!caracterA.equals("}")) 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
+                            break OUTER;
+                        }
+                        break;
                 }
-                
                 if (contElementos > 1) 
                 {
                     CalcularFilaColumna(cont);
@@ -639,149 +641,161 @@ public class Archivo
        // {
             if (PrimerElemento==false) 
             {
-                if(caracterA.equals("'")) {
-                    PrimerElemento=true;
-                }
-                else if(caracterA.equals("\"")) {
-                    PrimerElemento=true;
-                }
-                else if (caracterA.equals(")")) {
-                    PrimerElemento=true;
-                }
-                else   
+                switch (caracterA)
                 {
-                    if (Elemento == -1) {
-                        while(!caracterA.equals("'"))
-                        {
-                            Aux--;
-                            Leer(nombreArchivo, 1, Aux);
-                            caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals("'")) {
-                                PrimerElemento=true;
-                            }
-                            else if (EsCaracter(Aux)) 
-                            {
-                                CalcularFilaColumna(cont);
-                                error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                    case "'":
+                        PrimerElemento=true;
+                        break;
+                    case "\"":
+                        PrimerElemento=true;
+                        break;
+                    case ")":
+                        PrimerElemento=true;
+                        break;
+                    default:
+                        switch (Elemento) 
+                        { 
+                            case -1:
+                                while(!caracterA.equals("'"))
+                                {
+                                    Aux--;
+                                    Leer(nombreArchivo, 1, Aux);
+                                    caracterA = new String(buffer).toLowerCase();
+                                    if (caracterA.equals("'")) {
+                                        PrimerElemento=true;
+                                    }
+                                    else if (EsCaracter(Aux))
+                                    {
+                                        CalcularFilaColumna(cont);
+                                        error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                                        break;
+                                    }
+                                }
                                 break;
-                            }
-                        }
-                    }
-                    else if (Elemento == 0) {
-                        while(!caracterA.equals("\""))
-                        {
-                            Aux--;
-                            Leer(nombreArchivo, 1, Aux);
-                            caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals("\"")) 
-                            {
-                                PrimerElemento=true;
-                            }
-                            else if (EsCaracter(Aux)) 
-                            {
-                                CalcularFilaColumna(cont);
-                                error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                            case 0:
+                                while(!caracterA.equals("\""))
+                                {
+                                    Aux--;
+                                    Leer(nombreArchivo, 1, Aux);
+                                    caracterA = new String(buffer).toLowerCase();
+                                    if (caracterA.equals("\""))
+                                    {
+                                        PrimerElemento=true;
+                                    }
+                                    else if (EsCaracter(Aux))
+                                    {
+                                        CalcularFilaColumna(cont);
+                                        error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                                        break;
+                                    }
+                                }
                                 break;
-                            }
-                        }
-                    }
-                    else if (Elemento == 1) {
-                        while(!caracterA.equals(")"))
-                        {
-                            Aux--;
-                            Leer(nombreArchivo, 1, Aux);
-                            caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals(")")) 
-                            {
-                                PrimerElemento=true;
-                            }
-                            else if (EsCaracter(Aux)) 
-                            {
-                                CalcularFilaColumna(cont);
-                                error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                            case 1:
+                                while(!caracterA.equals(")"))
+                                {
+                                    Aux--;
+                                    Leer(nombreArchivo, 1, Aux);
+                                    caracterA = new String(buffer).toLowerCase();
+                                    if (caracterA.equals(")"))
+                                    {
+                                        PrimerElemento=true;
+                                    }
+                                    else if (EsCaracter(Aux))
+                                    {
+                                        CalcularFilaColumna(cont);
+                                        error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                                        break;
+                                    }
+                                }
                                 break;
-                            }
+                            default:
+                                break;
                         }
-                    }
+                        break;
                 }
-                
                 if (PrimerElemento==true) 
                 {
                     Leer(nombreArchivo, 1, cont+2);
                     caracterA = new String(buffer).toLowerCase();
-                    if(caracterA.equals("'")) {
-                        SegundoElemento=true;
-                        cont = cont + 2;
-                    }
-                    else if(caracterA.equals("\"")) {
-                        SegundoElemento=true;
-                        cont = cont + 2;
-                    }
-                    else if (caracterA.equals("c")) {
-                        //examinar c
-                        cont = cont + 2;
-                        Leer(nombreArchivo, 2, cont+1);
-                        caracterA = new String(buffer).toLowerCase();
-                        if (caracterA.equals("hr"))
-                        {
-                            cont = cont+3;
-                            //es un chr
-                            cont = AnalizarCHR(cont);
-                            if(!error.equals(""))
-                            {
-                                return cont;
-                            }
-                            
-                        }
-                        else
-                        {
-                            CalcularFilaColumna(cont);
-                            error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
-                            return cont;
-                        }
-                    }
-                    else   
+                    switch (caracterA) 
                     {
-                        cont = cont + 1;
-                        while(!caracterA.equals("'")&& !caracterA.equals("c")&& !caracterA.equals("\""))
+                        case "'":
+                            SegundoElemento=true;
+                            cont = cont + 2;
+                            break;
+                        case "\"":
+                            SegundoElemento=true;
+                            cont = cont + 2;
+                            break;
+                        case "c":
                         {
-                            cont++;
-                            Leer(nombreArchivo, 1, cont);
+                            //examinar c
+                            cont = cont + 2;
+                            Leer(nombreArchivo, 2, cont+1);
                             caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals("'")) {
-                                SegundoElemento=true;
-                            }
-                            else if (caracterA.equals("\"")) {
-                                SegundoElemento=true;
-                            }
-                            else if (caracterA.equals("c")) {
-                                //examinar c
-                                Leer(nombreArchivo, 2, cont+1);
-                                caracterA = new String(buffer).toLowerCase();
-                                if (caracterA.equals("hr"))
+                            if (caracterA.equals("hr"))
+                            {
+                                cont = cont+3;
+                                //es un chr
+                                cont = AnalizarCHR(cont);
+                                if(!error.equals(""))
                                 {
-                                    cont = cont+3;
-                                    //es un chr
-                                    cont = AnalizarCHR(cont);
-                                    if(!error.equals(""))
+                                    return cont;
+                                }
+                                
+                            }
+                            else
+                            {
+                                CalcularFilaColumna(cont);
+                                error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
+                                return cont;
+                            }  
+                            break;
+                        }
+                        default:
+                        {
+                            cont = cont + 1;
+                            while(!caracterA.equals("'")&& !caracterA.equals("c")&& !caracterA.equals("\""))
+                            {
+                                cont++;
+                                Leer(nombreArchivo, 1, cont);
+                                caracterA = new String(buffer).toLowerCase();
+                                if (caracterA.equals("'")) {
+                                    SegundoElemento=true;
+                                }
+                                else if (caracterA.equals("\"")) {
+                                    SegundoElemento=true;
+                                }
+                                else if (caracterA.equals("c")) {
+                                    //examinar c
+                                    Leer(nombreArchivo, 2, cont+1);
+                                    caracterA = new String(buffer).toLowerCase();
+                                    if (caracterA.equals("hr"))
                                     {
+                                        cont = cont+3;
+                                        //es un chr
+                                        cont = AnalizarCHR(cont);
+                                        if(!error.equals(""))
+                                        {
+                                            break;
+                                        }
+                                        caracterA = "c";
+                                    }
+                                    else
+                                    {
+                                        CalcularFilaColumna(cont);
+                                        error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
                                         break;
                                     }
-                                    caracterA = "c";
                                 }
-                                else
+                                else if(EsCaracter(cont))
                                 {
                                     CalcularFilaColumna(cont);
-                                    error = "Invalid group element. Fila: " + filaError + " Columna: " + columnaError;
+                                    error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
                                     break;
                                 }
                             }
-                            else if(EsCaracter(cont)) 
-                            {
-                                CalcularFilaColumna(cont);
-                                error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
-                                break;
-                            }
+                            break;
                         } 
                     }
                     
@@ -826,43 +840,47 @@ public class Archivo
     
     public byte DistinguirPrimerElemento(long cont) throws IOException
     {
-        boolean BanderaComillas= false;
+        //boolean BanderaComillas= false;
         byte PrimerElemento = 0;
         long Aux = cont;
         Leer(nombreArchivo, 1, Aux-1);
         String caracterA = new String(buffer).toLowerCase();
-        if(caracterA.equals("'")) {
-            PrimerElemento = -1;
-        }
-        else if (caracterA.equals("\"")) {
-            PrimerElemento = 0;
-        }
-        else if (caracterA.equals(")")) {
-            PrimerElemento = 1;
-        }
-        else   
+        switch (caracterA)
         {
-            while(!caracterA.equals("\"")&&!caracterA.equals("'")&&!caracterA.equals(")"))
+            case "'":
+                PrimerElemento = -1;
+                break;
+            case "\"":
+                PrimerElemento = 0;
+                break;
+            case ")":
+                PrimerElemento = 1;
+                break;
+            default:
             {
-                Aux--;
-                Leer(nombreArchivo, 1, Aux);
-                caracterA = new String(buffer).toLowerCase();
-                if (caracterA.equals("\"")) {
-                    PrimerElemento = 0;
-                }
-                else if (caracterA.equals("'")) {
-                    PrimerElemento = -1;
-                }
-                else if (caracterA.equals(")")) {
-                    PrimerElemento = 1;
-                }
-                else if (EsCaracter(Aux)) 
+                while(!caracterA.equals("\"")&&!caracterA.equals("'")&&!caracterA.equals(")")) 
                 {
-                    CalcularFilaColumna(cont);
-                    error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
-                    break;
-                }
-            }        
+                    Aux--;
+                    Leer(nombreArchivo, 1, Aux);
+                    caracterA = new String(buffer).toLowerCase();
+                    if (caracterA.equals("\"")) {
+                        PrimerElemento = 0;        
+                    }
+                    else if (caracterA.equals("'")) {
+                        PrimerElemento = -1;
+                    }
+                    else if (caracterA.equals(")")) {
+                        PrimerElemento = 1;
+                    }
+                    else if (EsCaracter(Aux))
+                    {
+                        CalcularFilaColumna(cont);
+                        error = "Range definition error. Fila: " + filaError + " Columna: " + columnaError;
+                        break;
+                    }
+                }   
+                break;
+            }
         }
         return PrimerElemento;
     }
@@ -940,8 +958,8 @@ public class Archivo
         boolean banderaID = false, banderaNombre = false, banderaParentesis = false;
         while(!banderaFin)
         {
-            Leer(nombreArchivo, 1, cont);
-            caracterA = new String(buffer).toLowerCase();
+            //Leer(nombreArchivo, 1, cont);
+            //caracterA = new String(buffer).toLowerCase();
             if (!EsCaracter(cont)) {
                 cont++;
             }
@@ -1675,6 +1693,10 @@ public class Archivo
                                         String conjunto;
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
+                                        if(GuardarConjuntoEXP(conjunto))//Si se pudo guardar el nombre de conjunto llamado
+                                        {//entonces
+                                            //Verificar si ya ha sido declarado
+                                        }
                                         break;
                                     }
                                 }
@@ -1691,7 +1713,7 @@ public class Archivo
         }
         return cont;
     }
-    private void GuardarConjuntoEXP(String nombre) throws IOException
+    private boolean GuardarConjuntoEXP(String nombre) throws IOException
     {
         boolean NoExiste = true;
         for (Object conjunto : ConjuntosLlamados) 
@@ -1706,6 +1728,7 @@ public class Archivo
         {
             AccionesTokens.add(nombre);
         }
+        return NoExiste;
     }
     private long TokensEspeciales(long cont) throws IOException
     {
