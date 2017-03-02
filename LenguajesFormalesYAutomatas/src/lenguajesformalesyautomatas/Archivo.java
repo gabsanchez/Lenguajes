@@ -239,7 +239,7 @@ public class Archivo
         }
         if(NoExiste)
         {
-            AccionesTokens.add(iden);
+            AccionesTokens.add(iden.trim());
         }
     }
     public long AnalizarToken(long cont) throws IOException
