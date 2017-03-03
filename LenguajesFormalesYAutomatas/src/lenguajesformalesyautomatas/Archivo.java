@@ -357,7 +357,7 @@ public class Archivo
                     caracterA = new String(buffer).toLowerCase();
                     if(caracterA.equals("["))
                     {
-                        cont = TokensEspeciales(cont);
+                        cont = TokensEspeciales(cont + 1);
                     }
                     inicioExp = 0;
                     finExp = 0;
@@ -386,7 +386,7 @@ public class Archivo
             }
             
         }
-        return cont+1;
+        return cont;
     }
     private long SaltarEspacios(long cont) throws IOException
     {
@@ -1282,6 +1282,7 @@ public class Archivo
         boolean banderaNum=false, banderaIgual=false, banderaComilla = false;
         while(!caracterA.equals("}"))
         {
+            cont = SaltarEspacios(cont);
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
             if (Character.isDigit(caracterA.charAt(0))) 
@@ -1786,7 +1787,7 @@ public class Archivo
                 error = "] Expected. Fila: " + filaError + " Columna: " + columnaError;
             }
         }
-        return cont;
+        return cont + 1;
     }
     
     public long AnalizarError(long cont) throws IOException
