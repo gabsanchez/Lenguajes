@@ -76,6 +76,8 @@ public class Archivo
         }
         filaError++;
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Sintaxis">
     public void Analizar() throws IOException
     {
         long cont = 0;
@@ -400,16 +402,14 @@ public class Archivo
             cont++;
         }
         return cont;
-    }
-    
+    }  
     public boolean EsCaracter(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         return !caracterA.equals(" ") && !caracterA.equals("\t") && !caracterA.equals("\n") && !caracterA.equals("\r");
         
-    }
-    
+    }  
     int contElementos=0;
     public long AnalizarConjunto(long cont) throws IOException
     {
@@ -616,8 +616,7 @@ public class Archivo
         
         contElementos=0;
         return cont + 1;
-    }
-    
+    }   
     public long AnalizarRango(long cont) throws IOException
     {
         long Aux = cont;
@@ -819,7 +818,6 @@ public class Archivo
             
         return cont;
     }
-    
     public byte DistinguirPrimerElemento(long cont) throws IOException
     {
         boolean BanderaComillas= false;
@@ -862,7 +860,6 @@ public class Archivo
         }
         return PrimerElemento;
     }
-    
     public long AnalizarCHR(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -925,8 +922,7 @@ public class Archivo
             return cont;
         }
         return cont+1;
-    }
-    
+    }   
     public long AnalizarAcciones(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -1229,8 +1225,7 @@ public class Archivo
             ValidarAcciones();
         }
         return cont;
-    }
-    
+    }   
     public void ValidarAcciones()
     {
         boolean Existe=false;
@@ -1250,8 +1245,7 @@ public class Archivo
                 break;
             }
         }
-    }
-    
+    }   
     public long AnalizarContenidoAcciones(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -1443,7 +1437,6 @@ public class Archivo
         cont = cont +1;
         return cont;
     }
-
     private long ValidarParentesis(long cont, long fin) throws IOException
     {
         long master = 0;
@@ -1475,8 +1468,7 @@ public class Archivo
             error = ") Expected. Fila: " + filaError + " Columna: " + columnaError;
         }
         return master;
-    }
-    
+    }  
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
         if(parentesis == 0)
@@ -1701,8 +1693,7 @@ public class Archivo
             }
         }
         return cont;
-    }
-    
+    }   
     public long AnalizarError(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -1790,4 +1781,11 @@ public class Archivo
         }
         return cont;
     }
+    
+// </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Logica">
+    
+    
+    // </editor-fold>
 }
