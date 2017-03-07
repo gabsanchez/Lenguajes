@@ -366,7 +366,7 @@ public class Archivo
                     caracterA = new String(buffer).toLowerCase();
                     if(caracterA.equals("["))
                     {
-                        cont = TokensEspeciales(cont + 1);
+                        cont = TokensEspeciales(cont);
                     }
                     inicioExp = 0;
                     finExp = 0;
