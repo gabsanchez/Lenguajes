@@ -662,7 +662,8 @@ public class Archivo
                         break;
                     case ")":
                         PrimerElemento=true;
-                        Primervalor = CHR.get(0).toString();
+                        Primervalor = CHR.get(CHR.size()-1).toString();
+                        CHR.remove(CHR.size()-1);
                         break;
                     default:
                         switch (Elemento) 
@@ -715,6 +716,8 @@ public class Archivo
                                     if (caracterA.equals(")"))
                                     {
                                         PrimerElemento=true;
+                                        Primervalor = CHR.get(CHR.size()-1).toString();
+                                        CHR.remove(CHR.size()-1);
                                     }
                                     else if (EsCaracter(Aux))
                                     {
@@ -791,6 +794,8 @@ public class Archivo
                                         cont = cont+3;
                                         //es un chr
                                         cont = AnalizarCHR(cont);
+                                        Segundovalor = CHR.get(CHR.size()-1).toString();
+                                        CHR.remove(CHR.size()-1);
                                         if(!error.equals(""))
                                         {
                                             break;
@@ -854,7 +859,8 @@ public class Archivo
                     contElementos--;
                 }
             }
-            
+        //Validar el rango
+        ValidacionRangos(Primervalor,Segundovalor);
         return cont;
     }
     public byte DistinguirPrimerElemento(long cont) throws IOException
@@ -1911,6 +1917,10 @@ public class Archivo
         int Asccii1=0;
         if (!Character.isDigit(L1.charAt(0))) {
             Asccii1 = (int)L1.charAt(0);
+        }
+        else
+        {
+            
         }
     }
     
