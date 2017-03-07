@@ -38,6 +38,10 @@ public class Archivo
     List AccionesTokens = new ArrayList();
     
     List ConjuntosLlamados = new ArrayList();
+    List ConjuntosDeclarados = new ArrayList();
+    List CHR = new ArrayList();
+    
+    
     public Archivo()
     {
         fd = new FileDialog(form, "Abrir archivo", FileDialog.LOAD);
@@ -169,6 +173,9 @@ public class Archivo
                                 //seccion de error
                                 cont = cont + 4;
                                 cont = AnalizarError(cont);
+                                if (error.equals("")||error.equals("File read successfully.")) {
+                                    ValidarAcciones();
+                                }
                                 if (!error.equals("")) 
                                 {
                                     break OUTER;
@@ -625,6 +632,7 @@ public class Archivo
     }   
     public long AnalizarRango(long cont) throws IOException
     {
+        String Primervalor ="", Segundovalor="";
         long Aux = cont;
         boolean PrimerElemento=false, SegundoElemento=false;
         byte Elemento = DistinguirPrimerElemento(cont);
@@ -644,12 +652,17 @@ public class Archivo
                 {
                     case "'":
                         PrimerElemento=true;
+                        Leer(nombreArchivo, 1, Aux-1);
+                        Primervalor = new String(buffer).toLowerCase();
                         break;
                     case "\"":
                         PrimerElemento=true;
+                        Leer(nombreArchivo, 1, Aux-1);
+                        Primervalor = new String(buffer).toLowerCase();
                         break;
                     case ")":
                         PrimerElemento=true;
+                        Primervalor = CHR.get(0).toString();
                         break;
                     default:
                         switch (Elemento) 
@@ -662,6 +675,8 @@ public class Archivo
                                     caracterA = new String(buffer).toLowerCase();
                                     if (caracterA.equals("'")) {
                                         PrimerElemento=true;
+                                        Leer(nombreArchivo, 1, Aux-1);
+                                        Primervalor = new String(buffer).toLowerCase();
                                     }
                                     else if (EsCaracter(Aux))
                                     {
@@ -680,6 +695,8 @@ public class Archivo
                                     if (caracterA.equals("\""))
                                     {
                                         PrimerElemento=true;
+                                        Leer(nombreArchivo, 1, Aux-1);
+                                        Primervalor = new String(buffer).toLowerCase();
                                     }
                                     else if (EsCaracter(Aux))
                                     {
@@ -805,6 +822,8 @@ public class Archivo
                             Leer(nombreArchivo, 1, cont+2);
                             caracterA = new String(buffer).toLowerCase();
                             if (caracterA.equals("'")) {
+                                Leer(nombreArchivo, 1, cont+1);
+                                Segundovalor = new String(buffer).toLowerCase();
                                 cont = cont+3;                                
                             }
                             else
@@ -820,6 +839,8 @@ public class Archivo
                             caracterA = new String(buffer).toLowerCase();
                             if (caracterA.equals("\"")) 
                             {
+                                Leer(nombreArchivo, 1, cont+1);
+                                Segundovalor = new String(buffer).toLowerCase();
                                 cont = cont+3;                                
                             }
                             else
@@ -884,6 +905,7 @@ public class Archivo
     }
     public long AnalizarCHR(long cont) throws IOException
     {
+        String Numero = "";
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         boolean banderaNum=false, banderaYano= false;
@@ -929,6 +951,7 @@ public class Archivo
             else if (Character.isDigit(caracterA.charAt(0))&& !banderaYano) {
                 cont++;
                 banderaNum=true;
+                Numero = Numero + caracterA;
             }
             else if (!caracterA.equals(")")) 
             {
@@ -943,7 +966,10 @@ public class Archivo
             error = "number expected. Fila: " + filaError + " Columna: " + columnaError;
             return cont;
         }
-        return cont+1;
+        
+        CHR.add(Numero);
+        cont=cont+1;
+        return cont;
     }   
     public long AnalizarAcciones(long cont) throws IOException
     {
@@ -954,8 +980,8 @@ public class Archivo
         boolean banderaID = false, banderaNombre = false, banderaParentesis = false;
         while(!banderaFin)
         {
-            //Leer(nombreArchivo, 1, cont);
-            //caracterA = new String(buffer).toLowerCase();
+            Leer(nombreArchivo, 1, cont);
+            caracterA = new String(buffer).toLowerCase();
             if (!EsCaracter(cont)) {
                 cont++;
             }
@@ -1242,9 +1268,6 @@ public class Archivo
                 banderaParentesis=false;
                 Accion="";
             }
-            else if (!EsCaracter(cont)) {
-                cont++;
-            }
         }
         //Vaidar si las acciones definidas en los tokens si estan
         if (error.equals("")||error.equals("File read successfully.")) {
@@ -1357,6 +1380,9 @@ public class Archivo
                             }
                         }
                         cont++;
+                        banderaIgual=false;
+                        banderaNum=false;
+                        banderaComilla=false;
                     }
                     else if (banderaComilla) 
                     {
@@ -1395,6 +1421,9 @@ public class Archivo
                             }
                         }
                         cont++;
+                        banderaIgual=false;
+                        banderaNum=false;
+                        banderaComilla=false;
                     }
                     else if (banderaComilla) 
                     {
@@ -1495,8 +1524,7 @@ public class Archivo
             error = ") Expected. Fila: " + filaError + " Columna: " + columnaError;
         }
         return master;
-    }  
-
+    } 
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
         if(parentesis == 0)
@@ -1786,8 +1814,7 @@ public class Archivo
         }
 
         return cont + 1;
-    }
-    
+    }  
     public long AnalizarError(long cont) throws IOException
     {
         Leer(nombreArchivo, 1, cont);
@@ -1879,7 +1906,13 @@ public class Archivo
 // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Logica">
-    
+    public void ValidacionRangos(String L1, String L2)
+    {       
+        int Asccii1=0;
+        if (!Character.isDigit(L1.charAt(0))) {
+            Asccii1 = (int)L1.charAt(0);
+        }
+    }
     
     // </editor-fold>
 }
