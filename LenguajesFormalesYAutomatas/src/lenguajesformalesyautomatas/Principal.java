@@ -93,7 +93,6 @@ public class Principal extends javax.swing.JFrame {
             else
             {
                 JOptionPane.showMessageDialog(rootPane, entrada.error);
-                //ta_salida.append(entrada.Tokens.get(2));
             }
         } 
         catch (IOException ex) 
