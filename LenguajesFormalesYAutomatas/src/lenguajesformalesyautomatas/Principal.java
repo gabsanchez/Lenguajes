@@ -84,7 +84,7 @@ public class Principal extends javax.swing.JFrame {
             {
                 ta_salida.append("CONJUNTOS");
                 ta_salida.append("\n");
-                for (int i = 0; i < entrada.Tokens.size(); i++) 
+                for (int i = 0; i < entrada.ConjuntosDeclarados.size(); i++) 
                 {
                     ta_salida.append(entrada.ConjuntosDeclarados.get(i) + "{" + entrada.Elementos.get(i));
                     ta_salida.append("\n");
@@ -96,6 +96,16 @@ public class Principal extends javax.swing.JFrame {
                     ta_salida.append(entrada.ListaNumeros.get(i) + ": " + entrada.Tokens.get(i));
                     ta_salida.append("\n");
                 }
+                ta_salida.append("ACCIONES");
+                ta_salida.append("\n");
+                for (int i = 0; i < entrada.ContenidoAcciones.size(); i++) 
+                {
+                    ta_salida.append(entrada.ContenidoAcciones.get(i)+"");
+                    ta_salida.append("\n");
+                }
+                ta_salida.append("ERROR");
+                ta_salida.append("\n");
+                ta_salida.append(entrada.ListaNumeros.get(entrada.ListaNumeros.size()-1).toString());
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 

@@ -38,6 +38,7 @@ public class Archivo
     List Acciones = new ArrayList();
     List AccionesTokens = new ArrayList();
     List PunterosAccionesTokens = new ArrayList();
+    List ContenidoAcciones = new ArrayList();
     
     List ConjuntosLlamados = new ArrayList();
     List ConjuntosDeclarados = new ArrayList();
@@ -83,8 +84,7 @@ public class Archivo
             aux++;
         }
         filaError++;
-    }
-    
+    } 
     // <editor-fold defaultstate="collapsed" desc="Sintaxis">
     public void Analizar() throws IOException
     {
@@ -1180,7 +1180,7 @@ public class Archivo
                     {
                         break;
                     }
-                    
+                    ContenidoAcciones.add(Accion+":");
                     cont = AnalizarContenidoAcciones(cont);
                     if(!error.equals(""))
                     {
@@ -1329,12 +1329,13 @@ public class Archivo
                 {
                     break;
                 }
+                ContenidoAcciones.add(Accion+":");
                 cont = AnalizarContenidoAcciones(cont);
                 if(!error.equals(""))
                 {
                     break;
                 }
-                Acciones.add(Accion);
+                Acciones.add(Accion);      
                 banderaID=false;
                 banderaNombre =false;
                 banderaParentesis=false;
@@ -1352,6 +1353,7 @@ public class Archivo
         boolean Existe=false;
         for (int i = 0; i < AccionesTokens.size(); i++) 
         {
+            Existe=false;
             for (int j = 0; j < Acciones.size(); j++) 
             {
                 if (AccionesTokens.get(i).equals(Acciones.get(j))) 
@@ -1373,6 +1375,7 @@ public class Archivo
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         String Token="";
+        String TodoCont = "";
         boolean banderaNum=false, banderaIgual=false, banderaComilla = false;
         while(!caracterA.equals("}"))
         {
@@ -1390,6 +1393,7 @@ public class Archivo
                 if (!banderaNum) {
                     cont++;
                     Token=Token+caracterA;
+                    TodoCont=TodoCont+caracterA;
                     banderaNum=true;   
                 }
                 else if (banderaNum) {
@@ -1399,6 +1403,7 @@ public class Archivo
                         Leer(nombreArchivo, 1, cont);
                         caracterA = new String(buffer).toLowerCase();
                         Token=Token+caracterA;
+                        TodoCont=TodoCont+caracterA;
                         cont++;
                     }
                     else
@@ -1414,6 +1419,7 @@ public class Archivo
                 if (banderaNum) {
                     if (!banderaIgual) {
                         cont++;
+                        TodoCont=TodoCont+caracterA;
                         banderaIgual = true;
                     }
                     else if (banderaIgual) 
@@ -1436,6 +1442,7 @@ public class Archivo
                     if (!banderaComilla) {
                         banderaComilla = true;
                         cont++;
+                        TodoCont=TodoCont+caracterA;
                         Leer(nombreArchivo, 1, cont);
                         caracterA = new String(buffer).toLowerCase();
                         while(!caracterA.equals("'"))
@@ -1451,11 +1458,24 @@ public class Archivo
                                 error = "' expected. Fila: " + filaError + " Columna: " + columnaError;
                                 break;
                             }
+                            TodoCont=TodoCont+caracterA;
                         }
                         cont++;
                         banderaIgual=false;
                         banderaNum=false;
                         banderaComilla=false;
+                        if (!ListaNumeros.contains(Token)) 
+                        {
+                            ListaNumeros.add(Token);
+                            ContenidoAcciones.add(TodoCont);
+                            Token="";
+                            TodoCont="";
+                        }
+                        else if (ListaNumeros.contains(Token)) 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
+                        }
                     }
                     else if (banderaComilla) 
                     {
@@ -1478,6 +1498,7 @@ public class Archivo
                     {
                         banderaComilla = true;
                         cont++;
+                        TodoCont=TodoCont+caracterA;
                         Leer(nombreArchivo, 1, cont);
                         caracterA = new String(buffer).toLowerCase();
                         while(!caracterA.equals("\""))
@@ -1493,11 +1514,23 @@ public class Archivo
                                 error = "\" expected. Fila: " + filaError + " Columna: " + columnaError;
                                 break;
                             }
+                            TodoCont=TodoCont+caracterA;
                         }
                         cont++;
                         banderaIgual=false;
                         banderaNum=false;
                         banderaComilla=false;
+                        if (!ListaNumeros.contains(Token)) {
+                            ListaNumeros.add(Token);
+                            ContenidoAcciones.add(TodoCont);
+                            Token="";
+                            TodoCont="";
+                        }
+                        else if (ListaNumeros.contains(Token)) 
+                        {
+                            CalcularFilaColumna(cont);
+                            error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
+                        }
                     }
                     else if (banderaComilla) 
                     {
@@ -1516,20 +1549,6 @@ public class Archivo
             }
             else if (!EsCaracter(cont)) {
                 cont++;
-                if (banderaComilla) {
-                    banderaNum=false;
-                    banderaIgual=false;
-                    banderaComilla=false;
-                    if (!ListaNumeros.contains(Token)) {
-                        ListaNumeros.add(Token);
-                        Token="";
-                    }
-                    else if (ListaNumeros.contains(Token)) 
-                    {
-                        CalcularFilaColumna(cont);
-                        error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
-                    }
-                }
             }
             else if (EsCaracter(cont))
             {
@@ -1540,21 +1559,7 @@ public class Archivo
                     break;
                 }
                 else if(caracterA.equals("}"))
-                { 
-                    if (banderaComilla) {
-                        banderaNum=false;
-                        banderaIgual=false;
-                        banderaComilla=false;
-                        if (!ListaNumeros.contains(Token)) {
-                            ListaNumeros.add(Token);
-                            Token="";
-                        }
-                        else if (ListaNumeros.contains(Token)) 
-                        {
-                            CalcularFilaColumna(cont);
-                            error = "Token id already taken. Fila: " + filaError + " Columna: " + columnaError;
-                        }
-                    }
+                {                     
                     if (banderaComilla || banderaIgual || banderaNum) 
                     {
                         CalcularFilaColumna(cont);
@@ -1563,6 +1568,7 @@ public class Archivo
                     }
                 }
             }
+                    
         }
         cont = cont +1;
         return cont;
@@ -1982,7 +1988,7 @@ public class Archivo
     // <editor-fold defaultstate="collapsed" desc="Logica">
     public void ValidacionRangos(String L1, String L2)
     {       
-        int Asccii1=0, Asccii2=0;
+        int Asccii1=0, Asccii2=0;  
         if (!Character.isDigit(L1.charAt(0))) {
             Asccii1 = (int)L1.charAt(0);
             if (!Character.isDigit(L2.charAt(0))) {                
@@ -1996,9 +2002,6 @@ public class Archivo
                 Asccii2 = Integer.parseInt(L2);
                 if (Asccii1>Asccii2) {
                     error="Invalid range declaration.";
-                }
-                if (Asccii2>255&&Asccii2<0) {
-                    error="Unsupported range limit.";
                 }
             }
         }
@@ -2017,14 +2020,15 @@ public class Archivo
                 if (Asccii1>Asccii2) {
                     error="Invalid range declaration.";
                 }
-                if (Asccii2>255&&Asccii2<0) {
-                    error="Unsupported range limit.";
-                }
-            }
-            if (Asccii1>255&&Asccii1<0) {
-                error="Unsupported range limit.";
-            }
+            } 
         }
+        
+        if (Asccii1>255||Asccii1<0) {
+            error="Unsupported range limit.";
+        }
+        if (Asccii2>255||Asccii2<0) {
+            error="Unsupported range limit.";
+        } 
     }
     
     // </editor-fold>
