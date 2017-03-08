@@ -424,6 +424,7 @@ public class Archivo
     int contElementos=0;
     public long AnalizarConjunto(long cont) throws IOException
     {
+        String NombreConjunto="";
         Leer(nombreArchivo, 1, cont);
         String caracterA = new String(buffer).toLowerCase();
         boolean banderaID = false, banderaNombre = false;
@@ -458,18 +459,22 @@ public class Archivo
                 if (!banderaID) {
                     cont++;
                     banderaID=true;
+                    NombreConjunto = NombreConjunto +caracterA;
                 }
             } 
             else if (banderaID) 
             {
                 if (caracterA.equals("_")) {
                     cont++;
+                    NombreConjunto = NombreConjunto +caracterA;
                 }
                 else if (Character.isDigit(caracterA.charAt(0))) {
                     cont++;
+                    NombreConjunto = NombreConjunto +caracterA;
                 }
                 else if (Character.isLetter(caracterA.charAt(0))) {
                     cont++;
+                    NombreConjunto = NombreConjunto +caracterA;
                 }
                 else if (!EsCaracter(cont)) {
                     banderaNombre=true;
@@ -505,6 +510,8 @@ public class Archivo
                 break;
             }
         }
+        
+        ConjuntosDeclarados.add(NombreConjunto);
         
         if (error.equals("")) //si no hay error evaluar el contenido
         {
@@ -652,12 +659,12 @@ public class Archivo
                 {
                     case "'":
                         PrimerElemento=true;
-                        Leer(nombreArchivo, 1, Aux-1);
+                        Leer(nombreArchivo, 1, Aux-2);
                         Primervalor = new String(buffer).toLowerCase();
                         break;
                     case "\"":
                         PrimerElemento=true;
-                        Leer(nombreArchivo, 1, Aux-1);
+                        Leer(nombreArchivo, 1, Aux-2);
                         Primervalor = new String(buffer).toLowerCase();
                         break;
                     case ")":
@@ -861,6 +868,11 @@ public class Archivo
             }
         //Validar el rango
         ValidacionRangos(Primervalor,Segundovalor);
+        if (!error.equals("")) {
+            CalcularFilaColumna(cont);
+            error = "Invalid character. Fila: " + filaError + " Columna: " + columnaError;
+            return cont;
+        }
         return cont;
     }
     public byte DistinguirPrimerElemento(long cont) throws IOException
@@ -1914,13 +1926,48 @@ public class Archivo
     // <editor-fold defaultstate="collapsed" desc="Logica">
     public void ValidacionRangos(String L1, String L2)
     {       
-        int Asccii1=0;
+        int Asccii1=0, Asccii2=0;
         if (!Character.isDigit(L1.charAt(0))) {
             Asccii1 = (int)L1.charAt(0);
+            if (!Character.isDigit(L2.charAt(0))) {                
+                Asccii2 = (int)L2.charAt(0);
+                if (Asccii1>Asccii2) {
+                    error="Invalid range declaration.";
+                }
+            }
+            else
+            {
+                Asccii2 = Integer.parseInt(L2);
+                if (Asccii1>Asccii2) {
+                    error="Invalid range declaration.";
+                }
+                if (Asccii2>255&&Asccii2<0) {
+                    error="Invalid range declaration.";
+                }
+            }
         }
         else
         {
-            
+            Asccii1 = Integer.parseInt(L1);
+            if (!Character.isDigit(L2.charAt(0))) {                
+                Asccii2 = (int)L2.charAt(0);
+                if (Asccii1>Asccii2) {
+                    error="Invalid range declaration.";
+                }
+            }
+            else
+            {
+                Asccii2 = Integer.parseInt(L2);                
+                if (Asccii1>Asccii2) {
+                    error="Invalid range declaration.";
+                }
+                if (Asccii2>255&&Asccii2<0) {
+                    error="Invalid range declaration. ";
+                }
+            }
+            if (Asccii1>255&&Asccii1<0) {
+                error="Invalid range declaration.";
+            }
         }
     }
     
