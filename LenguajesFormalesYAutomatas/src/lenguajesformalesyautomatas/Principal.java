@@ -88,12 +88,8 @@ public class Principal extends javax.swing.JFrame {
                     ta_salida.append(entrada.ListaNumeros.get(i) + ": " + entrada.Tokens.get(i));
                     ta_salida.append("\n");
                 }
-                JOptionPane.showMessageDialog(rootPane, entrada.error);
             }
-            else
-            {
                 JOptionPane.showMessageDialog(rootPane, entrada.error);
-            }
         } 
         catch (IOException ex) 
         {

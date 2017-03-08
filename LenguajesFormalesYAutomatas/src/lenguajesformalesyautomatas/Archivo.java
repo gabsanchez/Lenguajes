@@ -775,6 +775,8 @@ public class Archivo
                                 cont = cont+3;
                                 //es un chr
                                 cont = AnalizarCHR(cont);
+                                Segundovalor = CHR.get(CHR.size()-1).toString();
+                                CHR.remove(CHR.size()-1);
                                 if(!error.equals(""))
                                 {
                                     return cont;
@@ -1961,7 +1963,7 @@ public class Archivo
         }
         else
         {
-            Asccii1 = Integer.parseInt(L1);
+            Asccii1 = Integer.parseInt(L1);//comentar
             if (!Character.isDigit(L2.charAt(0))) {                
                 Asccii2 = (int)L2.charAt(0);
                 if (Asccii1>Asccii2) {
