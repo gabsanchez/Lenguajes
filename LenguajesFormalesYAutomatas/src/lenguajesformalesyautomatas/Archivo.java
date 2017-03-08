@@ -53,7 +53,6 @@ public class Archivo
     {
         fd.setVisible(true);
         nombreArchivo = fd.getDirectory() + fd.getFile();
-        //Leer(nombreArchivo, 1, 23);
         Analizar();
     }
     public void Leer(String nombreA, int size, long pos) throws FileNotFoundException, IOException
@@ -136,7 +135,7 @@ public class Archivo
             else if (cont == tamArchivo) 
             {
                 CalcularFilaColumna(cont);
-                error = "TOKENS expected. Fila: " + filaError + " Columna: " + columnaError;
+                error = "TOKENS expected. Row: " + filaError + " Column: " + columnaError;
                 break;
             } 
             else if (EsCaracter(cont)) 
@@ -209,7 +208,7 @@ public class Archivo
                     }
                 } else {
                     CalcularFilaColumna(cont);
-                    error = "TOKENS expected. Fila: " + filaError + " Columna: " + columnaError;
+                    error = "TOKENS expected. Row: " + filaError + " Column: " + columnaError;
                     break;
                 }
             } else {
@@ -231,7 +230,7 @@ public class Archivo
             {
                 NoExiste = false;
                 CalcularFilaColumna(cont);
-                error = "Number already taken. Fila: " + filaError + " Columna: " + columnaError;
+                error = "Number already taken. Row: " + filaError + " Column: " + columnaError;
                 break;
             }
         }
@@ -265,7 +264,7 @@ public class Archivo
         int tamNum = 0;
         long aux;
         int tamToken;
-        String sToken;
+        String sToken = "";
         long auxT = 0;
         long numero;
         coma: while(!caracterA.equals(";"))
@@ -320,7 +319,7 @@ public class Archivo
                                 if (caracterA.equals("cciones")) 
                                 {
                                     CalcularFilaColumna(cont);
-                                    error = "';' expected. Fila: " + filaError + " Columna: " + columnaError;
+                                    error = "';' expected. Row: " + filaError + " Columna: " + columnaError;
                                     break coma;
                                 }
                                 else
@@ -406,7 +405,21 @@ public class Archivo
         tamToken = (int)(cont - auxT);
         Leer(nombreArchivo, tamToken, auxT);
         sToken = new String(buffer).toLowerCase();
-        Tokens.add(sToken.trim());
+        String[] arreglo = sToken.split(" ");
+        sToken = "";
+        for (String parte : arreglo) 
+        {
+            parte = parte.trim();
+            if(parte.endsWith("\""))
+            {
+                sToken = sToken + " " + parte;
+            }
+            else
+            {
+                sToken = sToken + parte;
+            }
+        }
+        Tokens.add(sToken);
         return cont;
     }
     private long SaltarEspacios(long cont) throws IOException
