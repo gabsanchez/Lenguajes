@@ -33,6 +33,8 @@ public class Principal extends javax.swing.JFrame {
     private void initComponents() {
 
         btnCargarArchivo = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        ta_salida = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -43,21 +45,29 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
+        ta_salida.setColumns(20);
+        ta_salida.setRows(5);
+        jScrollPane1.setViewportView(ta_salida);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(146, 146, 146)
-                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(135, Short.MAX_VALUE))
+                .addGap(87, 87, 87)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(91, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(170, Short.MAX_VALUE)
-                .addComponent(btnCargarArchivo)
-                .addGap(90, 90, 90))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE)
+                .addGap(32, 32, 32))
         );
 
         pack();
@@ -69,11 +79,21 @@ public class Principal extends javax.swing.JFrame {
         try 
         {
             entrada.Cargar();
-            if(entrada.error.equals(""))
-            JOptionPane.showMessageDialog(rootPane, "File read correctly");
+            if(entrada.error.equals("File read successfully."))
+            {
+                ta_salida.append("TOKENS");
+                ta_salida.append("\n");
+                for (int i = 0; i < entrada.Tokens.size(); i++) 
+                {
+                    ta_salida.append(entrada.ListaNumeros.get(i) + ": " + entrada.Tokens.get(i));
+                    ta_salida.append("\n");
+                }
+                JOptionPane.showMessageDialog(rootPane, entrada.error);
+            }
             else
             {
                 JOptionPane.showMessageDialog(rootPane, entrada.error);
+                //ta_salida.append(entrada.Tokens.get(2));
             }
         } 
         catch (IOException ex) 
@@ -121,5 +141,7 @@ public class Principal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCargarArchivo;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea ta_salida;
     // End of variables declaration//GEN-END:variables
 }

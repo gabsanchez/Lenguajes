@@ -31,11 +31,13 @@ public class Archivo
     long filaError;
     long columnaError;
     
-    List ListaNumeros = new ArrayList();
+    public List ListaNumeros = new ArrayList();
     public String error = "";
     
+    public List<String> Tokens = new ArrayList();
     List Acciones = new ArrayList();
     List AccionesTokens = new ArrayList();
+    List PunterosAccionesTokens = new ArrayList();
     
     List ConjuntosLlamados = new ArrayList();
     List ConjuntosDeclarados = new ArrayList();
@@ -173,7 +175,8 @@ public class Archivo
                                 //seccion de error
                                 cont = cont + 4;
                                 cont = AnalizarError(cont);
-                                if (error.equals("")||error.equals("File read successfully.")) {
+                                if (error.equals("")||error.equals("File read successfully.")) 
+                                {
                                     ValidarAcciones();
                                 }
                                 if (!error.equals("")) 
@@ -236,7 +239,7 @@ public class Archivo
             ListaNumeros.add(num);
         }
     }
-    private void AgregarIDToken(String iden) throws IOException
+    private void AgregarIDToken(String iden, long cont) throws IOException
     {
         boolean NoExiste = true;
         for (Object nombre : AccionesTokens) 
@@ -250,6 +253,7 @@ public class Archivo
         if(NoExiste)
         {
             AccionesTokens.add(iden.trim());
+            PunterosAccionesTokens.add(cont);
         }
     }
     public long AnalizarToken(long cont) throws IOException
@@ -257,8 +261,11 @@ public class Archivo
         String caracterA = "";
         boolean banderaNumero = false;
         boolean banderaIgual = false;
-        int tam = 0;
+        int tamNum = 0;
         long aux;
+        int tamToken;
+        String sToken;
+        long auxT = 0;
         long numero;
         coma: while(!caracterA.equals(";"))
         {
@@ -272,9 +279,9 @@ public class Archivo
                     cont++; 
                     Leer(nombreArchivo, 1, cont);
                     caracterA = new String(buffer).toLowerCase();
-                    tam++;
+                    tamNum++;
                 }
-                Leer(nombreArchivo, tam, aux);
+                Leer(nombreArchivo, tamNum, aux);
                 String auxiliar = new String(buffer).toLowerCase();
                 numero = Long.parseLong(auxiliar);
                 AgregarNumero(numero,cont);
@@ -296,6 +303,7 @@ public class Archivo
                 else if (banderaIgual) 
                 {
                     cont = SaltarEspacios(cont);
+                    auxT = cont;
                     Leer(nombreArchivo, 1, cont);
                     caracterA = new String(buffer).toLowerCase();
                     long flag = cont;
@@ -393,8 +401,11 @@ public class Archivo
                     cont = ComerEspacio(cont);
                 }
             }
-            
         }
+        tamToken = (int)(cont - auxT);
+        Leer(nombreArchivo, tamToken, auxT);
+        sToken = new String(buffer).toLowerCase();
+        Tokens.add(sToken.trim());
         return cont;
     }
     private long SaltarEspacios(long cont) throws IOException
@@ -1293,7 +1304,7 @@ public class Archivo
         }
         return cont;
     }   
-    public void ValidarAcciones()
+    public void ValidarAcciones() throws IOException
     {
         boolean Existe=false;
         for (int i = 0; i < AccionesTokens.size(); i++) 
@@ -1308,7 +1319,8 @@ public class Archivo
             }
             if (!Existe) 
             {
-                error="Undefined action: "+AccionesTokens.get(i);
+                CalcularFilaColumna((long)(PunterosAccionesTokens.get(i)));
+                error = "Undefined action: " + AccionesTokens.get(i) + " " + "Row: " + filaError + " Column: " + columnaError;
                 break;
             }
         }
@@ -1419,7 +1431,8 @@ public class Archivo
             }
             else if (caracterA.equals("\"")) {
                 if (banderaIgual) {
-                    if (!banderaComilla) {
+                    if (!banderaComilla) 
+                    {
                         banderaComilla = true;
                         cont++;
                         Leer(nombreArchivo, 1, cont);
@@ -1770,7 +1783,7 @@ public class Archivo
         }
         if(NoExiste)
         {
-            AccionesTokens.add(nombre);
+            ConjuntosLlamados.add(nombre);
         }
         return NoExiste;
     }
@@ -1820,7 +1833,7 @@ public class Archivo
             
             Leer(nombreArchivo, tam, aux);
             nombre = new String(buffer).toLowerCase();
-            AgregarIDToken(nombre);
+            AgregarIDToken(nombre, cont);
             cont = ComerEspacio(cont);
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
