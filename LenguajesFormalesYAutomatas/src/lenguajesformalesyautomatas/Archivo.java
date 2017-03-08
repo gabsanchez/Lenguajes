@@ -41,6 +41,7 @@ public class Archivo
     
     List ConjuntosLlamados = new ArrayList();
     List ConjuntosDeclarados = new ArrayList();
+    List Elementos = new ArrayList();
     List CHR = new ArrayList();
     
     
@@ -523,11 +524,14 @@ public class Archivo
         }
         
         ConjuntosDeclarados.add(NombreConjunto);
+        String Contenido = "";
+        long contInicial=cont;
         
         if (error.equals("")) //si no hay error evaluar el contenido
         {
             OUTER:
-            while (!caracterA.equals("}")) {
+            while (!caracterA.equals("}")) 
+            {
                 Leer(nombreArchivo, 1, cont);
                 caracterA = new String(buffer).toLowerCase();
                 switch (caracterA) 
@@ -567,6 +571,7 @@ public class Archivo
                         break;
                     }
                     case ".":
+                    {
                         Leer(nombreArchivo, 1, cont+1);
                         caracterA = new String(buffer).toLowerCase();
                         if (caracterA.equals(".")) 
@@ -586,6 +591,7 @@ public class Archivo
                             break OUTER;
                         }
                         break;
+                    }
                     case "c":
                     {
                         Leer(nombreArchivo, 2, cont+1);
@@ -643,11 +649,46 @@ public class Archivo
                     break;
                 }
             }
+            //Almacenar contenido de los conjuntos.
+            if (error.equals("")) {
+                Contenido = GuardarElementos(contInicial,Contenido);
+                Elementos.add(Contenido);                
+            }
         }
         
         contElementos=0;
         return cont + 1;
-    }   
+    }
+    
+    public String GuardarElementos(long contInicial, String Contenido) throws IOException
+    {
+        String caracterA="";
+        while (!caracterA.equals("}")) 
+        {
+            Leer(nombreArchivo, 1, contInicial);
+            caracterA = new String(buffer).toLowerCase();
+            //If de agregar contenido
+            if (EsCaracter(contInicial)) {
+                Contenido=Contenido+caracterA;
+            }
+            else if (!EsCaracter(contInicial)) {
+                Leer(nombreArchivo, 1, contInicial-1);
+                String Espacio1 = new String(buffer).toLowerCase();
+                Leer(nombreArchivo, 1, contInicial+1);
+                String Espacio2 = new String(buffer).toLowerCase();
+                if (Espacio1.equals("'")&&Espacio2.equals("'")) {
+                    Contenido=Contenido+caracterA;
+                }
+                else if (Espacio1.equals("\"")&&Espacio2.equals("\"")) {
+                    Contenido=Contenido+caracterA;
+                }
+            }
+            //fin del If de agregar contenido
+            contInicial++;
+        }
+        return Contenido;
+    }
+    
     public long AnalizarRango(long cont) throws IOException
     {
         String Primervalor ="", Segundovalor="";
@@ -883,7 +924,7 @@ public class Archivo
         ValidacionRangos(Primervalor,Segundovalor);
         if (!error.equals("")) {
             CalcularFilaColumna(cont);
-            error = "Invalid character. Fila: " + filaError + " Columna: " + columnaError;
+            error = error + " Fila: " + filaError + " Columna: " + columnaError;
             return cont;
         }
         return cont;
@@ -1957,7 +1998,7 @@ public class Archivo
                     error="Invalid range declaration.";
                 }
                 if (Asccii2>255&&Asccii2<0) {
-                    error="Invalid range declaration.";
+                    error="Unsupported range limit.";
                 }
             }
         }
@@ -1977,11 +2018,11 @@ public class Archivo
                     error="Invalid range declaration.";
                 }
                 if (Asccii2>255&&Asccii2<0) {
-                    error="Invalid range declaration. ";
+                    error="Unsupported range limit.";
                 }
             }
             if (Asccii1>255&&Asccii1<0) {
-                error="Invalid range declaration.";
+                error="Unsupported range limit.";
             }
         }
     }

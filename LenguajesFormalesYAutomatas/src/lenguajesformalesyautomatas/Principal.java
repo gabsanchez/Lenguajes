@@ -75,12 +75,20 @@ public class Principal extends javax.swing.JFrame {
     
     private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
         // TODO add your handling code here:
+        ta_salida.setText("");
         Archivo entrada = new Archivo();
         try 
         {
             entrada.Cargar();
             if(entrada.error.equals("File read successfully."))
             {
+                ta_salida.append("CONJUNTOS");
+                ta_salida.append("\n");
+                for (int i = 0; i < entrada.Tokens.size(); i++) 
+                {
+                    ta_salida.append(entrada.ConjuntosDeclarados.get(i) + "{" + entrada.Elementos.get(i));
+                    ta_salida.append("\n");
+                }
                 ta_salida.append("TOKENS");
                 ta_salida.append("\n");
                 for (int i = 0; i < entrada.Tokens.size(); i++) 
@@ -89,7 +97,7 @@ public class Principal extends javax.swing.JFrame {
                     ta_salida.append("\n");
                 }
             }
-                JOptionPane.showMessageDialog(rootPane, entrada.error);
+            JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 
         catch (IOException ex) 
         {
