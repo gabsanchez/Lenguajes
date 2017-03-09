@@ -403,23 +403,31 @@ public class Archivo
             }
         }
         tamToken = (int)(cont - auxT);
-        Leer(nombreArchivo, tamToken, auxT);
-        sToken = new String(buffer).toLowerCase();
-        String[] arreglo = sToken.split(" ");
-        sToken = "";
-        for (String parte : arreglo) 
+        String subcadena;
+        for (long i = auxT; i < cont; i++) 
         {
-            parte = parte.trim();
-            if(parte.endsWith("\""))
+            Leer(nombreArchivo, 1, i);
+            subcadena = new String(buffer).toLowerCase();
+            if(subcadena.equals(" "))
             {
-                sToken = sToken + " " + parte;
+                Leer(nombreArchivo, 1, i + 1);
+                String aux1 = new String(buffer).toLowerCase();
+                Leer(nombreArchivo, 1, i - 1);
+                String aux2 = new String(buffer).toLowerCase();
+                if((aux1.equals("\"") && aux2.equals("\"")) || (aux1.equals("\'") && aux2.equals("\'")))
+                {
+                    sToken = sToken + subcadena;
+                }
             }
             else
             {
-                sToken = sToken + parte;
+                sToken = sToken + subcadena;
             }
         }
-        Tokens.add(sToken);
+        //Leer(nombreArchivo, tamToken, auxT);
+        //sToken = new String(buffer).toLowerCase();
+        Tokens.add(sToken.trim());
+        //Tokens.add(sToken.replaceAll(" ","").trim());
         return cont;
     }
     private long SaltarEspacios(long cont) throws IOException
