@@ -45,6 +45,7 @@ public class Archivo
     List Elementos = new ArrayList();
     List CHR = new ArrayList();
     
+    List<String> CaracteresTokens;
     
     public Archivo()
     {
@@ -366,8 +367,9 @@ public class Archivo
                     }
                     inicioExp = cont;//Sirve para validar parentesis una vez solamente
                     finExp = flag;
-                    parentesis = ValidarParentesis(inicioExp, finExp);
+                    CaracteresTokens = new ArrayList();
                     cont = EvaluarExpresion(cont, flag);//Se evalua la expresion regular
+                    parentesis = ValidarParentesis(inicioExp, finExp);
                     cont++;
                     cont = SaltarEspacios(cont);
                     Leer(nombreArchivo, 1, cont);
@@ -1596,35 +1598,61 @@ public class Archivo
     }
     private long ValidarParentesis(long cont, long fin) throws IOException
     {
-        long master = 0;
+        parentesis = 0;
+        long aux = 0;
+        for (String caracter: CaracteresTokens) 
+        {
+            if(caracter.equals("("))
+            {
+                aux--;
+            }
+            else if(caracter.equals(")"))
+            {
+                aux++;
+            }
+        }
         while(cont < fin)
         {
+            if(parentesis < 0)
+            {
+                if(aux > 0)
+                {
+                    parentesis++;
+                    aux--;
+                }
+                else
+                {
+                    CalcularFilaColumna(cont);
+                    error = "( Missing. Fila: " + filaError + " Columna: " + columnaError;
+                    break;
+                }
+            }
             Leer(nombreArchivo, 1, cont);
             String caracterA = new String(buffer).toLowerCase();
             switch(caracterA)
             {
                 case "(":
-                    master++;
+                {
+                    parentesis++;
                     break;
+                } 
                 case ")":
-                    master--;
+                {
+                    parentesis--;
                     break;
+                } 
                 default:
                     break;
             }
             cont++;
         }
-        if(parentesis < 0)
-        {
-            CalcularFilaColumna(cont);
-            error = "( Missing. Fila: " + filaError + " Columna: " + columnaError;
-        }
-        else if(parentesis > 0)
+        parentesis = parentesis + aux;
+        if(parentesis > 0)
         {
             CalcularFilaColumna(cont);
             error = ") Expected. Fila: " + filaError + " Columna: " + columnaError;
         }
-        return master;
+        return parentesis;
     } 
     private long EvaluarExpresion(long cont, long posBandera) throws IOException
     {
@@ -1647,10 +1675,13 @@ public class Archivo
                     }
                     case "'":
                     {
-                        Leer(nombreArchivo, 1, cont+2);
+                        Leer(nombreArchivo, 1, cont + 2);
                         caracterA = new String(buffer).toLowerCase();
                         if (caracterA.equals("'"))
                         {
+                            Leer(nombreArchivo, 1, cont + 1);
+                            String caracterT = new String(buffer).toLowerCase();
+                            CaracteresTokens.add(caracterT);
                             cont = cont + 2;
                         }
                         else
@@ -1667,6 +1698,9 @@ public class Archivo
                         caracterA = new String(buffer).toLowerCase();
                         if (caracterA.equals("\""))
                         {
+                            Leer(nombreArchivo, 1, cont + 1);
+                            String caracterT = new String(buffer).toLowerCase();
+                            CaracteresTokens.add(caracterT);
                             cont = cont + 2;
                         }
                         else
