@@ -35,6 +35,7 @@ public class Principal extends javax.swing.JFrame {
         btnCargarArchivo = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         ta_salida = new javax.swing.JTextArea();
+        btn_clear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusable(false);
@@ -52,6 +53,15 @@ public class Principal extends javax.swing.JFrame {
         ta_salida.setFocusable(false);
         jScrollPane1.setViewportView(ta_salida);
 
+        btn_clear.setText("Clear");
+        btn_clear.setToolTipText("");
+        btn_clear.setEnabled(false);
+        btn_clear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_clearActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -60,20 +70,26 @@ public class Principal extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(87, 87, 87)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btn_clear, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(193, 193, 193)
                         .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(91, Short.MAX_VALUE))
+                .addGap(18, 18, 18))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(29, 29, 29)
-                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
                 .addGap(32, 32, 32))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btn_clear)
+                .addContainerGap())
         );
 
         pack();
@@ -121,6 +137,7 @@ public class Principal extends javax.swing.JFrame {
                 ta_salida.append(entrada.ListaNumeros.get(entrada.ListaNumeros.size()-1).toString());
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
+            btn_clear.setEnabled(true);
         } 
         catch (IOException ex) 
         {
@@ -129,6 +146,12 @@ public class Principal extends javax.swing.JFrame {
         }
         //hola sanchez
     }//GEN-LAST:event_btnCargarArchivoActionPerformed
+
+    private void btn_clearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_clearActionPerformed
+        // TODO add your handling code here:
+        ta_salida.setText("");
+        btn_clear.setEnabled(false);
+    }//GEN-LAST:event_btn_clearActionPerformed
 
     /**
      * @param args the command line arguments
@@ -167,6 +190,7 @@ public class Principal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCargarArchivo;
+    private javax.swing.JButton btn_clear;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea ta_salida;
     // End of variables declaration//GEN-END:variables
