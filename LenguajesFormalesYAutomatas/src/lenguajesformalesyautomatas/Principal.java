@@ -135,9 +135,9 @@ public class Principal extends javax.swing.JFrame {
                 ta_salida.append("\n");
                 ta_salida.append("\n");
                 ta_salida.append(entrada.ListaNumeros.get(entrada.ListaNumeros.size()-1).toString());
+                btn_clear.setEnabled(true);
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
-            btn_clear.setEnabled(true);
         } 
         catch (IOException ex) 
         {
