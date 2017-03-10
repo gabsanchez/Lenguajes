@@ -55,7 +55,14 @@ public class Archivo
     {
         fd.setVisible(true);
         nombreArchivo = fd.getDirectory() + fd.getFile();
-        Analizar();
+        if(!nombreArchivo.equals("nullnull"))
+        {
+            Analizar();
+        }
+        else
+        {
+            error = "No file selected";
+        }
     }
     public void Leer(String nombreA, int size, long pos) throws FileNotFoundException, IOException
     {
