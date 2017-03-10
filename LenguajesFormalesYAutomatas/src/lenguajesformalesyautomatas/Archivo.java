@@ -1851,7 +1851,7 @@ public class Archivo
                                     }
                                     default:
                                     {
-                                        cont++;
+                                        //cont++;
                                         Leer(nombreArchivo, 1, cont);
                                         caracterA = new String(buffer).toLowerCase();
                                         while(Character.isLetter(caracterA.charAt(0)) || Character.isDigit(caracterA.charAt(0)))
@@ -1861,18 +1861,25 @@ public class Archivo
                                             caracterA = new String(buffer).toLowerCase();
                                             tam++;
                                         }
+                                        cont++;
                                         String conjunto;
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
                                         if(GuardarConjuntoEXP(conjunto))//Si se pudo guardar el nombre de conjunto llamado
                                         {//entonces
                                             //Verificar si ya ha sido declarado
+                                            if (!ConjuntosDeclarados.contains(conjunto)) 
+                                            {
+                                                error = "Undefined group name \" " + conjunto + "\". Row: " + filaError + " Column: " + columnaError;
+                                            }
                                         }
                                         break;
                                     }
                                 }
                             }
+                            cont--;
                         }
+                        break;
                     }
                         
                 }
