@@ -1788,7 +1788,7 @@ public class Archivo
                         int tam = 0;
                         if(Character.isLetter(caracterA.charAt(0)))
                         {
-                            while(cont < posBandera)
+                            conjus: while(cont < posBandera)
                             {
                                 switch(caracterA)
                                 {
@@ -1865,15 +1865,17 @@ public class Archivo
                                         String conjunto;
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
+                                        tam = 0;
                                         if(GuardarConjuntoEXP(conjunto))//Si se pudo guardar el nombre de conjunto llamado
                                         {//entonces
                                             //Verificar si ya ha sido declarado
                                             if (!ConjuntosDeclarados.contains(conjunto)) 
                                             {
+                                                CalcularFilaColumna(cont);
                                                 error = "Undefined group name \" " + conjunto + "\". Row: " + filaError + " Column: " + columnaError;
                                             }
                                         }
-                                        break;
+                                        break conjus;
                                     }
                                 }
                             }
