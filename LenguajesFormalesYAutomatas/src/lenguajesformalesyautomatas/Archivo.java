@@ -127,6 +127,7 @@ public class Archivo
                     else
                     {
                         //es conjunto
+                        cont--;
                         cont = AnalizarConjunto(cont);
                         if(!error.equals(""))
                         {
@@ -166,6 +167,7 @@ public class Archivo
                             else 
                             {
                                 //Es conjunto
+                                cont--;
                                 cont = AnalizarConjunto(cont);
                                 if (!error.equals("")) {
                                     break OUTER;
@@ -195,6 +197,7 @@ public class Archivo
                             else 
                             {
                                 //Es conjunto
+                                cont--;
                                 cont = AnalizarConjunto(cont);
                                 if (!error.equals("")) 
                                 {
