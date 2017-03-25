@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  *
@@ -58,6 +59,8 @@ public class Archivo
         if(!nombreArchivo.equals("nullnull"))
         {
             Analizar();
+            //Evaluar tokens para el automata.
+            FirstLastFollow();
         }
         else
         {
@@ -92,6 +95,7 @@ public class Archivo
         }
         filaError++;
     } 
+    
     // <editor-fold defaultstate="collapsed" desc="Sintaxis">
     public void Analizar() throws IOException
     {
@@ -2104,4 +2108,339 @@ public class Archivo
     }
     
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Automata">
+    Stack<String> Operador = new Stack<String>();
+    Stack<NodoExpresion> Hoja = new Stack<NodoExpresion>();
+    int contadorHoja=0;
+    public void FirstLastFollow()
+    {
+        String TokenActual="";
+        for (int i = 0; i < Tokens.size(); i++) {
+            TokenActual = Tokens.get(i);
+            char Elemento = ' ';
+            for (int j = 0; j < TokenActual.length(); j++) {
+                Elemento = TokenActual.charAt(j);
+                    if(Elemento == '\'')
+                    {
+                        //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
+                        if (EsConcatenacion(TokenActual,j)) {
+                            Operador.push(".");
+                        }
+                        //Agregar elemento.
+                        contadorHoja++;
+                        j++;
+                        Elemento = TokenActual.charAt(j);
+                        Hoja.push(Agregar(Elemento+""));
+                        j++;
+                    }
+                    else if(Elemento == '"')
+                    {
+                        //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
+                        if (EsConcatenacion(TokenActual,j)) {
+                            Operador.push(".");
+                        }
+                        //Agregar elemento.
+                        contadorHoja++;
+                        j++;
+                        Elemento = TokenActual.charAt(j);
+                        Hoja.push(Agregar(Elemento+""));
+                        j++;
+                    }
+                    else if(Character.isLetter(Elemento)) //Es un conjunto
+                    {
+                        //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
+                        if (EsConcatenacion(TokenActual,j)) {
+                            Operador.push(".");
+                        }
+                        //Agregar elemento.
+                        //Armar el nombre del conjunto
+                        contadorHoja++;
+                        String Cojnuto = ArmarNombreConjunto(Elemento+"", TokenActual,j);
+                        Hoja.push(Agregar(Cojnuto));
+                        j=j+Cojnuto.length();
+                        j--;
+                    }
+                    else if (Elemento == '|') 
+                    {
+                        //Si viene | debe operar todas las concatenaciones anteriores y luego agregarse en la pila.
+                        if (Operador.peek().equals(".")) 
+                        {
+                            boolean BanderaConcat=false;
+                            while(!BanderaConcat)
+                            {
+                                //Concatenar
+                                Operador.pop();
+                                OperarConcatenacion();
+                                if (Operador.isEmpty()) {
+                                    BanderaConcat= true;
+                                }
+                                else if (!Operador.peek().equals(".")) {
+                                    BanderaConcat= true;
+                                }
+                            }
+                        }
+                        Operador.push("|");
+                    }
+                    else if(Elemento == '(')
+                    {
+                        //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
+                        if (EsConcatenacion(TokenActual,j)) {
+                            Operador.push(".");
+                        }
+                        //Agregar operador
+                        Operador.push("(");
+                    }
+                    else if(Elemento == ')')
+                    {
+                        //Operar todo lo de adentro.
+                        while(!Operador.peek().equals("("))
+                        {
+                            if (Operador.peek().equals(".")) {
+                                OperarConcatenacion();
+                                Operador.pop();
+                            }
+                            else  if (Operador.peek().equals("|")) {
+                                OperarO();
+                                Operador.pop();
+                            }
+                        }
+                        Operador.pop();
+                    }
+                    else if(Elemento == '*')
+                    {
+                        //Operar de inmediato
+                        OperarCerradura("*");
+                    }
+                    else if(Elemento == '+')
+                    {
+                        //Operar de inmediato
+                        OperarCerradura("+");
+                    }
+                    else if(Elemento == '?')
+                    {
+                        //Operar de inmediato
+                        OperarCerradura("?");
+                    }
+                    else if(Elemento == ';')
+                    {
+                        //Operar todo
+                        while(!Operador.isEmpty())
+                        {
+                            if (Operador.peek().equals(".")) {
+                                OperarConcatenacion();
+                                Operador.pop();
+                            }
+                            else  if (Operador.peek().equals("|")) {
+                                OperarO();
+                                Operador.pop();
+                            }
+                        }
+                        
+                        if (i==Tokens.size()) {
+                            //Operar todo
+                            while(!Operador.isEmpty())
+                            {
+                                if (Operador.peek().equals(".")) {
+                                    OperarConcatenacion();
+                                    Operador.pop();
+                                }
+                                else  if (Operador.peek().equals("|")) {
+                                    OperarO();
+                                    Operador.pop();
+                                }
+                            }
+                            Operador.push(".");
+                            
+                            //Agregar asterisco.
+                            contadorHoja++;
+                            NodoExpresion Asterisco = new NodoExpresion();
+                            Asterisco.Elemento="#";
+                            Asterisco.First.add(contadorHoja+"");
+                            Asterisco.Last.add(contadorHoja+"");
+                            Asterisco.bNulable = false;
+                            Hoja.add(Asterisco);
+                            
+                            Operador.pop();
+                            OperarConcatenacion();
+                        }
+                        else
+                        {
+                            Operador.push("|");
+                        }
+                        break;
+                    }
+            }
+            
+        }
+ 
+    }
+    
+    public NodoExpresion Agregar(String Element)
+    {
+        NodoExpresion E = new NodoExpresion();
+        E.Elemento = "'"+Element+"'";
+        E.First.add(contadorHoja+"");
+        E.Last.add(contadorHoja+"");
+        E.bNulable = false;
+        return E;
+    }
+    
+    public String ArmarNombreConjunto(String Element, String Expresion, int cont)
+    {
+        boolean bConjunto = false;
+        boolean posibleconjunto= false;
+        String Nombre = Element;
+        while(!bConjunto)
+        {
+            if (!ConjuntosDeclarados.contains(Nombre)) 
+            {
+                cont++;
+                Nombre = Nombre + Expresion.charAt(cont);
+            }
+            else if(ConjuntosDeclarados.contains(Nombre))
+            {
+                bConjunto=true;
+            }
+        }
+        return Nombre;
+    }
+    
+    public boolean EsConcatenacion(String Expresion, int cont)
+    {
+        if (cont==0) {
+            return false;
+        }
+        boolean Bandera=false;
+        char CaracterAnterior = Expresion.charAt(cont-1);
+        if (CaracterAnterior == '*'||CaracterAnterior == '+'||CaracterAnterior == '?'||CaracterAnterior == '\''||CaracterAnterior == '"'||CaracterAnterior == ')')
+        {
+             Bandera=true;
+        }
+        else if (Character.isLetter(CaracterAnterior)||Character.isDigit(CaracterAnterior)||CaracterAnterior == '_') 
+        {
+             Bandera=true;
+        }
+        else if (CaracterAnterior == ' ') {
+            Bandera = EsConcatenacion(Expresion,cont-1);
+        }
+        else
+        {
+            Bandera=false;
+        }
+        return Bandera;
+    }
+    
+    public void OperarConcatenacion()
+    {
+        NodoExpresion Elemento1;
+        NodoExpresion Elemento2;
+        NodoExpresion Final = new NodoExpresion();
+        Elemento2 = Hoja.peek();
+        Hoja.pop();
+        Elemento1 = Hoja.peek();
+        Hoja.pop();
+        Final.Elemento = Elemento1.Elemento+Elemento2.Elemento;
+        //Calcular first
+        if (Elemento1.bNulable) {
+            for (int i = 0; i < Elemento1.First.size(); i++) {
+                Final.First.add(Elemento1.First.get(i));
+            }
+            for (int i = 0; i < Elemento2.First.size(); i++) {
+                Final.First.add(Elemento2.First.get(i));
+            }
+        }
+        else if (!Elemento1.bNulable) {
+            for (int i = 0; i < Elemento1.First.size(); i++) {
+                Final.First.add(Elemento1.First.get(i));
+            }
+        }
+        //Calcular last
+        if (Elemento2.bNulable) {
+            for (int i = 0; i < Elemento1.Last.size(); i++) {
+                Final.Last.add(Elemento1.Last.get(i));
+            }
+            for (int i = 0; i < Elemento2.Last.size(); i++) {
+                Final.Last.add(Elemento2.Last.get(i));
+            }
+        }
+        else if (!Elemento2.bNulable) {
+            for (int i = 0; i < Elemento2.Last.size(); i++) {
+                Final.Last.add(Elemento2.Last.get(i));
+            }
+        }
+        //Calcular nulabilidad
+        if (Elemento1.bNulable&&Elemento2.bNulable) {
+            Final.bNulable = true;
+        }
+        else
+        {
+            Final.bNulable = false;
+        }
+        //Datos para el follow
+        Final.LastIzq=Elemento1.Last;
+        Final.FirstDer=Elemento2.First;
+        //Meter El ultimo
+        Hoja.push(Final);
+    }
+    
+    public void OperarO()
+    {
+        NodoExpresion Elemento1;
+        NodoExpresion Elemento2;
+        NodoExpresion Final = new NodoExpresion();
+        Elemento2 = Hoja.peek();
+        Hoja.pop();
+        Elemento1 = Hoja.peek();
+        Hoja.pop();
+        Final.Elemento = Elemento1.Elemento+"|"+Elemento2.Elemento;
+        //Calcular first
+        for (int i = 0; i < Elemento1.First.size(); i++) {
+            Final.First.add(Elemento1.First.get(i));
+        }
+        for (int i = 0; i < Elemento2.First.size(); i++) {
+            Final.First.add(Elemento2.First.get(i));
+        }
+        //Calcular last
+        for (int i = 0; i < Elemento1.Last.size(); i++) {
+            Final.Last.add(Elemento1.Last.get(i));
+        }
+        for (int i = 0; i < Elemento2.Last.size(); i++) {
+            Final.Last.add(Elemento2.Last.get(i));
+        }
+        //Calcular nulabilidad
+        if (!Elemento1.bNulable&&!Elemento2.bNulable) {
+            Final.bNulable = false;
+        }
+        else
+        {
+            Final.bNulable = true;
+        }
+        //Meter El ultimo
+        Hoja.push(Final);
+    }
+    
+    public void OperarCerradura(String Cerradura)
+    {
+        NodoExpresion Evaluar = new NodoExpresion();
+        NodoExpresion Final = new NodoExpresion();
+        Evaluar = Hoja.peek();
+        Hoja.pop();
+        Final.Elemento = Evaluar.Elemento+Cerradura;
+        Final.First = Evaluar.First;
+        Final.Last = Evaluar.Last;
+        if (Cerradura.equals("*")) {
+            Final.bNulable= true;
+        }
+        else if (Cerradura.equals("?")) {
+            Final.bNulable= true;
+        }
+        else if (Cerradura.equals("+")) {
+            Final.bNulable= false;
+        }
+    }
+    
+    // </editor-fold>
+    
+    
 }
