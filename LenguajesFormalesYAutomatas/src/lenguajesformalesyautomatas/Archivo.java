@@ -2112,6 +2112,7 @@ public class Archivo
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Automata">
+    List<NodoExpresion> FirstLast = new ArrayList();
     Stack<String> Operador = new Stack<String>();
     Stack<NodoExpresion> Hoja = new Stack<NodoExpresion>();
     int contadorHoja=0;
@@ -2133,7 +2134,8 @@ public class Archivo
                         contadorHoja++;
                         j++;
                         Elemento = TokenActual.charAt(j);
-                        Hoja.push(Agregar(Elemento+""));
+                        Hoja.push(Agregar("'"+Elemento+"'"));
+                        FirstLast.add(Agregar("'"+Elemento+"'"));
                         j++;
                     }
                     else if(Elemento == '"')
@@ -2146,7 +2148,8 @@ public class Archivo
                         contadorHoja++;
                         j++;
                         Elemento = TokenActual.charAt(j);
-                        Hoja.push(Agregar(Elemento+""));
+                        Hoja.push(Agregar("'"+Elemento+"'"));
+                        FirstLast.add(Agregar("'"+Elemento+"'"));
                         j++;
                     }
                     else if(Character.isLetter(Elemento)) //Es un conjunto
@@ -2160,6 +2163,7 @@ public class Archivo
                         contadorHoja++;
                         String Cojnuto = ArmarNombreConjunto(Elemento+"", TokenActual,j);
                         Hoja.push(Agregar(Cojnuto));
+                        FirstLast.add(Agregar(Cojnuto));
                         j=j+Cojnuto.length();
                         j--;
                     }
@@ -2239,7 +2243,7 @@ public class Archivo
                             }
                         }
                         
-                        if (i==Tokens.size()) {
+                        if (i==Tokens.size()-1) {
                             //Operar todo
                             while(!Operador.isEmpty())
                             {
@@ -2262,6 +2266,7 @@ public class Archivo
                             Asterisco.Last.add(contadorHoja+"");
                             Asterisco.bNulable = false;
                             Hoja.add(Asterisco);
+                            FirstLast.add(Asterisco);
                             
                             Operador.pop();
                             OperarConcatenacion();
@@ -2281,7 +2286,7 @@ public class Archivo
     public NodoExpresion Agregar(String Element)
     {
         NodoExpresion E = new NodoExpresion();
-        E.Elemento = "'"+Element+"'";
+        E.Elemento = Element;
         E.First.add(contadorHoja+"");
         E.Last.add(contadorHoja+"");
         E.bNulable = false;
@@ -2303,6 +2308,25 @@ public class Archivo
             else if(ConjuntosDeclarados.contains(Nombre))
             {
                 bConjunto=true;
+                //Verificar si no puede ser otro conjunto.
+                cont++;
+                String Aux=Nombre + Expresion.charAt(cont);
+                while(!posibleconjunto)
+                {
+                    if (!ConjuntosDeclarados.contains(Aux)) 
+                    {
+                        cont++;
+                        Aux = Aux + Expresion.charAt(cont);
+                        if (Aux.endsWith(";")) {
+                            posibleconjunto=true;
+                        }
+                    }
+                    else if(ConjuntosDeclarados.contains(Aux))
+                    {
+                        posibleconjunto=true;
+                        Nombre=Aux;
+                    }
+                }
             }
         }
         return Nombre;
@@ -2384,6 +2408,7 @@ public class Archivo
         Final.FirstDer=Elemento2.First;
         //Meter El ultimo
         Hoja.push(Final);
+        FirstLast.add(Final);
     }
     
     public void OperarO()
@@ -2420,6 +2445,7 @@ public class Archivo
         }
         //Meter El ultimo
         Hoja.push(Final);
+        FirstLast.add(Final);
     }
     
     public void OperarCerradura(String Cerradura)
@@ -2428,7 +2454,7 @@ public class Archivo
         NodoExpresion Final = new NodoExpresion();
         Evaluar = Hoja.peek();
         Hoja.pop();
-        Final.Elemento = Evaluar.Elemento+Cerradura;
+        Final.Elemento = "("+Evaluar.Elemento+")"+Cerradura;
         Final.First = Evaluar.First;
         Final.Last = Evaluar.Last;
         if (Cerradura.equals("*")) {
@@ -2440,6 +2466,8 @@ public class Archivo
         else if (Cerradura.equals("+")) {
             Final.bNulable= false;
         }
+        Hoja.push(Final);
+        FirstLast.add(Final);
     }
     
     // </editor-fold>

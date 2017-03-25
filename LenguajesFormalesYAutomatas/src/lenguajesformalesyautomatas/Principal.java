@@ -36,6 +36,8 @@ public class Principal extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         ta_salida = new javax.swing.JTextArea();
         btn_clear = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        ta_FirstLast = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setFocusable(false);
@@ -62,6 +64,10 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
+        ta_FirstLast.setColumns(20);
+        ta_FirstLast.setRows(5);
+        jScrollPane2.setViewportView(ta_FirstLast);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -70,26 +76,30 @@ public class Principal extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(87, 87, 87)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btn_clear, javax.swing.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(193, 193, 193)
-                        .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18))
+                        .addComponent(btnCargarArchivo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(btn_clear, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(29, 29, 29)
-                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                .addComponent(btnCargarArchivo, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
                 .addGap(32, 32, 32))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btn_clear)
-                .addContainerGap())
+                .addComponent(btn_clear))
         );
 
         pack();
@@ -98,6 +108,7 @@ public class Principal extends javax.swing.JFrame {
     private void btnCargarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarArchivoActionPerformed
         // TODO add your handling code here:
         ta_salida.setText("");
+        ta_FirstLast.setText("");
         Archivo entrada = new Archivo();
         try 
         {
@@ -136,6 +147,13 @@ public class Principal extends javax.swing.JFrame {
                 ta_salida.append("\n");
                 ta_salida.append(entrada.ListaNumeros.get(entrada.ListaNumeros.size()-1).toString());
                 btn_clear.setEnabled(true);
+                
+
+                for (int i = 0; i < entrada.FirstLast.size(); i++) 
+                {
+                    ta_FirstLast.append(entrada.FirstLast.get(i).Elemento + "[ F:" +entrada.FirstLast.get(i).First+" L:"+entrada.FirstLast.get(i).Last+" N:"+entrada.FirstLast.get(i).bNulable+" ]");
+                    ta_FirstLast.append("\n");
+                }
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 
@@ -192,6 +210,8 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JButton btnCargarArchivo;
     private javax.swing.JButton btn_clear;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea ta_FirstLast;
     private javax.swing.JTextArea ta_salida;
     // End of variables declaration//GEN-END:variables
 }
