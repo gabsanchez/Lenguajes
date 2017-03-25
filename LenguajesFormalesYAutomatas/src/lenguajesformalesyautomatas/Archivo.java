@@ -41,7 +41,7 @@ public class Archivo
     List PunterosAccionesTokens = new ArrayList();
     List ContenidoAcciones = new ArrayList();
     
-    List ConjuntosLlamados = new ArrayList();
+    List<String> ConjuntosLlamados = new ArrayList();
     List ConjuntosDeclarados = new ArrayList();
     List Elementos = new ArrayList();
     List CHR = new ArrayList();
@@ -1869,15 +1869,11 @@ public class Archivo
                                         String conjunto;
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
-                                        tam = 0;
-                                        if(GuardarConjuntoEXP(conjunto))//Si se pudo guardar el nombre de conjunto llamado
-                                        {//entonces
-                                            //Verificar si ya ha sido declarado
-                                            if (!ConjuntosDeclarados.contains(conjunto)) 
-                                            {
-                                                CalcularFilaColumna(cont);
-                                                error = "Undefined group name \" " + conjunto + "\". Row: " + filaError + " Column: " + columnaError;
-                                            }
+                                        //tam = 0;
+                                        if(!GuardarConjuntoEXP(conjunto))
+                                        {
+                                            CalcularFilaColumna(cont);
+                                            error = "Undefined group name \" " + conjunto + "\". Row: " + filaError + " Column: " + columnaError;
                                         }
                                         break conjus;
                                     }
@@ -1899,20 +1895,27 @@ public class Archivo
     }
     private boolean GuardarConjuntoEXP(String nombre) throws IOException
     {
-        boolean NoExiste = true;
-        for (Object conjunto : ConjuntosLlamados) 
+        boolean Declarado = false;
+        int indice = 0;
+        String aux;
+        for (int i = 1; i <= nombre.length(); i++) 
         {
-            if(conjunto.equals(nombre))
+            aux = nombre.substring(indice, i);
+            if(ConjuntosDeclarados.contains(aux))
             {
-                NoExiste = false;
-                break;
+                Declarado = true;
+                if (!ConjuntosLlamados.contains(aux)) 
+                {
+                    ConjuntosLlamados.add(aux);
+                }
+                indice = i;
+            }
+            else
+            {
+                Declarado = false;
             }
         }
-        if(NoExiste)
-        {
-            ConjuntosLlamados.add(nombre);
-        }
-        return NoExiste;
+        return Declarado;
     }
     private long TokensEspeciales(long cont) throws IOException
     {
