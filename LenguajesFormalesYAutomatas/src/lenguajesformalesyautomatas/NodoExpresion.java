@@ -12,7 +12,8 @@ import java.util.List;
  *
  * @author williams
  */
-public class NodoExpresion {
+public class NodoExpresion 
+{
     public String Elemento;
     public List<String> First = new ArrayList();
     public List<String> Last = new ArrayList();

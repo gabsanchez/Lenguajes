@@ -2144,7 +2144,8 @@ public class Archivo
                     else if(Elemento == '"')
                     {
                         //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
-                        if (EsConcatenacion(TokenActual,j)) {
+                        if (EsConcatenacion(TokenActual,j)) 
+                        {
                             Operador.push(".");
                         }
                         //Agregar elemento.
@@ -2299,7 +2300,7 @@ public class Archivo
     public String ArmarNombreConjunto(String Element, String Expresion, int cont)
     {
         boolean bConjunto = false;
-        boolean posibleconjunto= false;
+        //boolean posibleconjunto= false;
         String Nombre = Element;
         while(!bConjunto)
         {
