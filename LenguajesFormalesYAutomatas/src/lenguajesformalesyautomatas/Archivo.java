@@ -2144,7 +2144,8 @@ public class Archivo
                     else if(Elemento == '"')
                     {
                         //Agregar concatenacion si hay un ')', caracter, cerradura o conjunto.
-                        if (EsConcatenacion(TokenActual,j)) {
+                        if (EsConcatenacion(TokenActual,j)) 
+                        {
                             Operador.push(".");
                         }
                         //Agregar elemento.
