@@ -2462,12 +2462,16 @@ public class Archivo
         Final.Last = Evaluar.Last;
         if (Cerradura.equals("*")) {
             Final.bNulable= true;
+            Final.FirstDer = Evaluar.First;
+            Final.LastIzq = Evaluar.Last;
         }
         else if (Cerradura.equals("?")) {
             Final.bNulable= true;
         }
         else if (Cerradura.equals("+")) {
             Final.bNulable= false;
+            Final.FirstDer = Evaluar.First;
+            Final.LastIzq = Evaluar.Last;
         }
         Hoja.push(Final);
         FirstLast.add(Final);
