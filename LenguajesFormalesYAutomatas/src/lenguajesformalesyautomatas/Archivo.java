@@ -2454,7 +2454,7 @@ public class Archivo
     
     public void OperarCerradura(String Cerradura)
     {
-        NodoExpresion Evaluar = new NodoExpresion();
+        NodoExpresion Evaluar;
         NodoExpresion Final = new NodoExpresion();
         Evaluar = Hoja.peek();
         Hoja.pop();
