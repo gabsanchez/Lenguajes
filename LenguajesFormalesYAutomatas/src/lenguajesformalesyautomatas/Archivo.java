@@ -12,7 +12,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
+import java.util.Hashtable;
 /**
  *
  * @author gabriel
@@ -50,6 +50,7 @@ public class Archivo
     
     public Archivo()
     {
+        //this.nodoKey = new ArrayList();
         fd = new FileDialog(form, "Abrir archivo", FileDialog.LOAD);
     }
     public void Cargar() throws IOException
@@ -2319,11 +2320,12 @@ public class Archivo
                 {
                     if (!ConjuntosDeclarados.contains(Aux)) 
                     {
-                        cont++;
-                        Aux = Aux + Expresion.charAt(cont);
                         if (Aux.endsWith(";")) {
                             posibleconjunto=true;
+                            break;
                         }
+                        cont++;
+                        Aux = Aux + Expresion.charAt(cont);
                     }
                     else if(ConjuntosDeclarados.contains(Aux))
                     {
@@ -2410,6 +2412,8 @@ public class Archivo
         //Datos para el follow
         Final.LastIzq=Elemento1.Last;
         Final.FirstDer=Elemento2.First;
+        //Calcular follow
+        CalcularFollow();
         //Meter El ultimo
         Hoja.push(Final);
         FirstLast.add(Final);
@@ -2477,7 +2481,45 @@ public class Archivo
         Hoja.push(Final);
         FirstLast.add(Final);
     }
-    
+    public List<String> TablaFollow = new ArrayList();
+    public void CalcularFollow()
+    {
+        List<String> hojas = new ArrayList();
+        List<List<String>> follows = new ArrayList();
+        int contador = 0;
+        for (NodoExpresion ne : FirstLast) 
+        {
+            if(!(ne.LastIzq == null) || !(ne.FirstDer == null))
+            {
+               for(String hoja : ne.LastIzq)
+               {
+                   if(!hojas.contains(hoja))
+                   {
+                       hojas.add(hoja);
+                       follows.add(ne.FirstDer);
+                   }
+                   else
+                   {
+                       int indice = hojas.indexOf(hoja);
+                       List<String> auxiliar = follows.get(indice);
+                       for(String f : ne.FirstDer)
+                       {
+                           if(!auxiliar.contains(f))
+                           {
+                               auxiliar.add(f);
+                           }
+                       }
+                       follows.set(indice, auxiliar);
+                   }
+               }
+            }
+        }
+        for(String element : hojas)
+        {
+            TablaFollow.add(element + ": " + follows.get(contador).toString());
+            contador++;
+        }
+    }
     // </editor-fold>
     
     

@@ -151,7 +151,23 @@ public class Principal extends javax.swing.JFrame {
 
                 for (int i = 0; i < entrada.FirstLast.size(); i++) 
                 {
-                    ta_FirstLast.append(entrada.FirstLast.get(i).Elemento + "[ F:" +entrada.FirstLast.get(i).First+" L:"+entrada.FirstLast.get(i).Last+" N:"+entrada.FirstLast.get(i).bNulable+" ]");
+                    ta_FirstLast.append(entrada.FirstLast.get(i).Elemento);
+                    ta_FirstLast.append("\n");
+                    ta_FirstLast.append("   First:" +entrada.FirstLast.get(i).First);
+                    ta_FirstLast.append("\n");
+                    ta_FirstLast.append("   Last:"+entrada.FirstLast.get(i).Last);
+                    ta_FirstLast.append("\n");
+                    ta_FirstLast.append("   Nulable:"+entrada.FirstLast.get(i).bNulable);
+                    ta_FirstLast.append("\n");
+                }
+                ta_FirstLast.append("\n");
+                ta_FirstLast.append("FOLLOW");
+                ta_FirstLast.append("\n");
+                ta_FirstLast.append("\n");
+                for(String follow : entrada.TablaFollow)
+                {
+                    
+                    ta_FirstLast.append(follow);
                     ta_FirstLast.append("\n");
                 }
             }
