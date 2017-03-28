@@ -1871,7 +1871,7 @@ public class Archivo
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
                                         //tam = 0;
-                                        if(!GuardarConjuntoEXP(conjunto))
+                                        if(!GuardarConjuntoEXP(conjunto, 0, conjunto.length()))
                                         {
                                             CalcularFilaColumna(cont);
                                             error = "Undefined group name \" " + conjunto + "\". Row: " + filaError + " Column: " + columnaError;
@@ -1894,14 +1894,38 @@ public class Archivo
         }
         return cont;
     }
-    private boolean GuardarConjuntoEXP(String nombre) throws IOException
+    private boolean GuardarConjuntoEXP(String nombre, int comienzo, int fin) throws IOException
     {
-        boolean Declarado = false;
-        int indice = 0;
-        String aux;
-        for (int i = 1; i <= nombre.length(); i++) 
+        if(comienzo == fin)
         {
-            aux = nombre.substring(indice, i);
+            return true;
+        }
+        else if(ConjuntosDeclarados.contains(nombre.substring(comienzo, fin)))
+        {
+            if (!ConjuntosLlamados.contains(nombre.substring(comienzo, fin))) 
+            {
+                ConjuntosLlamados.add(nombre.substring(comienzo, fin));
+            }
+            return GuardarConjuntoEXP(nombre, fin, nombre.length());
+        }
+        else
+        {
+            if(fin - 1 == comienzo)
+            {
+                return false;
+            }
+            else
+            {
+                return GuardarConjuntoEXP(nombre, comienzo, fin - 1);
+            }
+        }
+        /*boolean Declarado = false;
+        int indice_i = 0;
+        int indice_f = nombre.length();
+        String aux;
+        for (int i = indice_f; i > indice_i; i--) 
+        {
+            aux = nombre.substring(indice_i, i);
             if(ConjuntosDeclarados.contains(aux))
             {
                 Declarado = true;
@@ -1909,14 +1933,15 @@ public class Archivo
                 {
                     ConjuntosLlamados.add(aux);
                 }
-                indice = i;
+                indice_i = i;
+                i = indice_f;
             }
             else
             {
                 Declarado = false;
             }
         }
-        return Declarado;
+        return Declarado;*/
     }
     private long TokensEspeciales(long cont) throws IOException
     {
