@@ -2309,30 +2309,39 @@ public class Archivo
             {
                 cont++;
                 Nombre = Nombre + Expresion.charAt(cont);
+                if (Nombre.endsWith(";")) {
+                    bConjunto = true;
+                }
             }
             else if(ConjuntosDeclarados.contains(Nombre))
             {
                 bConjunto=true;
                 //Verificar si no puede ser otro conjunto.
-                cont++;
-                String Aux=Nombre + Expresion.charAt(cont);
-                while(!posibleconjunto)
-                {
-                    if (!ConjuntosDeclarados.contains(Aux)) 
-                    {
-                        if (Aux.endsWith(";")) {
-                            posibleconjunto=true;
-                            break;
-                        }
-                        cont++;
-                        Aux = Aux + Expresion.charAt(cont);
-                    }
-                    else if(ConjuntosDeclarados.contains(Aux))
-                    {
-                        posibleconjunto=true;
-                        Nombre=Aux;
-                    }
+                String Aux = Nombre;
+                Element = Nombre + Expresion.charAt(cont);
+                Nombre = ArmarNombreConjunto(Element,Expresion,cont);
+                if (Nombre.endsWith(";")) {
+                    Nombre =Aux;
                 }
+                //cont++;
+                //String Aux=Nombre + Expresion.charAt(cont);
+                //while(!posibleconjunto)
+                //{
+                //    if (!ConjuntosDeclarados.contains(Aux)) 
+                //    {
+                //        if (Aux.endsWith(";")) {
+                //            posibleconjunto=true;
+                //            break;
+                //        }
+                //        cont++;
+                //        Aux = Aux + Expresion.charAt(cont);
+                //    }
+                //    else if(ConjuntosDeclarados.contains(Aux))
+                //   {
+                //        posibleconjunto=true;
+                //        Nombre=Aux;
+                //    }
+                //}
             }
         }
         return Nombre;
