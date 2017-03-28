@@ -2528,7 +2528,7 @@ public class Archivo
         int contador = 0;
         for (NodoExpresion ne : FirstLast) 
         {
-            if(!(ne.LastIzq == null) || !(ne.FirstDer == null))
+            if((!(ne.LastIzq == null) || !(ne.FirstDer == null)) && error.equals("File read successfully"))
             {
                for(String hoja : ne.LastIzq)
                {
