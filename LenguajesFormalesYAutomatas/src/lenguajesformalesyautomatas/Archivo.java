@@ -61,7 +61,9 @@ public class Archivo
         {
             Analizar();
             //Evaluar tokens para el automata.
-            FirstLastFollow();
+            if (error.equals("File read successfully.")) {
+                FirstLastFollow();
+            }
         }
         else
         {
@@ -2332,17 +2334,20 @@ public class Archivo
         {
             if (!ConjuntosDeclarados.contains(Nombre)) 
             {
-                cont++;
-                Nombre = Nombre + Expresion.charAt(cont);
                 if (Nombre.endsWith(";")) {
                     bConjunto = true;
+                    break;
                 }
+                cont++;
+                Nombre = Nombre + Expresion.charAt(cont);
+                
             }
             else if(ConjuntosDeclarados.contains(Nombre))
             {
                 bConjunto=true;
                 //Verificar si no puede ser otro conjunto.
                 String Aux = Nombre;
+                cont++;
                 Element = Nombre + Expresion.charAt(cont);
                 Nombre = ArmarNombreConjunto(Element,Expresion,cont);
                 if (Nombre.endsWith(";")) {
