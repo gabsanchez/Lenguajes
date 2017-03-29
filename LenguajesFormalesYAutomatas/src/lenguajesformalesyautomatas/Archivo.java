@@ -163,12 +163,12 @@ public class Archivo
                         case "a":
                         {
                             cont++;
-                            Leer(nombreArchivo, 7, cont);
+                            Leer(nombreArchivo, 8, cont);
                             caracterA = new String(buffer).toLowerCase();
                             if (caracterA.equals("cciones ")||caracterA.equals("cciones\t")||caracterA.equals("cciones\n")||caracterA.equals("cciones\r")) 
                             {
                                 //seccion de acciones
-                                cont = cont + 7;
+                                cont = cont + 8;
                                 cont = AnalizarAcciones(cont);
                             } 
                             else 
