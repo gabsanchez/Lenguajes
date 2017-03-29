@@ -122,7 +122,7 @@ public class Archivo
                 {
                     Leer(nombreArchivo, 5, cont);
                     caracterA = new String(buffer).toLowerCase();
-                    if (caracterA.equals("oken ")||caracterA.equals("oken\n")||caracterA.equals("oken\t"))
+                    if (caracterA.equals("oken ")||caracterA.equals("oken\n")||caracterA.equals("oken\r")||caracterA.equals("oken\t"))
                     {
                         cont = cont + 5;
                         cont = AnalizarToken(cont);
@@ -165,7 +165,7 @@ public class Archivo
                             cont++;
                             Leer(nombreArchivo, 7, cont);
                             caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals("cciones")) 
+                            if (caracterA.equals("cciones ")||caracterA.equals("cciones\t")||caracterA.equals("cciones\n")||caracterA.equals("cciones\r")) 
                             {
                                 //seccion de acciones
                                 cont = cont + 7;
@@ -2202,22 +2202,25 @@ public class Archivo
                     else if (Elemento == '|') 
                     {
                         //Si viene | debe operar todas las concatenaciones anteriores y luego agregarse en la pila.
-                        if (Operador.peek().equals(".")) 
-                        {
-                            boolean BanderaConcat=false;
-                            while(!BanderaConcat)
+                        if (!Operador.isEmpty()) {
+                            if (Operador.peek().equals(".")) 
                             {
-                                //Concatenar
-                                Operador.pop();
-                                OperarConcatenacion();
-                                if (Operador.isEmpty()) {
-                                    BanderaConcat= true;
-                                }
-                                else if (!Operador.peek().equals(".")) {
-                                    BanderaConcat= true;
+                                boolean BanderaConcat=false;
+                                while(!BanderaConcat)
+                                {
+                                    //Concatenar
+                                    Operador.pop();
+                                    OperarConcatenacion();
+                                    if (Operador.isEmpty()) {
+                                        BanderaConcat= true;
+                                    }
+                                    else if (!Operador.peek().equals(".")) {
+                                        BanderaConcat= true;
+                                    }
                                 }
                             }
                         }
+                        
                         Operador.push("|");
                     }
                     else if(Elemento == '(')
@@ -2520,6 +2523,7 @@ public class Archivo
         Hoja.push(Final);
         FirstLast.add(Final);
     }
+    
     public List<String> TablaFollow = new ArrayList();
     public void CalcularFollow()
     {
