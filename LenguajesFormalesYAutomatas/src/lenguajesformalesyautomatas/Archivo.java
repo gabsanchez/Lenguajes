@@ -2153,7 +2153,8 @@ public class Archivo
         for (int i = 0; i < Tokens.size(); i++) {
             TokenActual = Tokens.get(i);
             char Elemento = ' ';
-            for (int j = 0; j < TokenActual.length(); j++) {
+            for (int j = 0; j < TokenActual.length(); j++) 
+            {
                 Elemento = TokenActual.charAt(j);
                     if(Elemento == '\'')
                     {
@@ -2313,7 +2314,7 @@ public class Archivo
                         break;
                     }
             }
-            
+            CalcularFollow();
         }
  
     }
@@ -2455,7 +2456,7 @@ public class Archivo
         Final.LastIzq=Elemento1.Last;
         Final.FirstDer=Elemento2.First;
         //Calcular follow
-        CalcularFollow();
+        //CalcularFollow();
         //Meter El ultimo
         Hoja.push(Final);
         FirstLast.add(Final);
@@ -2532,7 +2533,7 @@ public class Archivo
         int contador = 0;
         for (NodoExpresion ne : FirstLast) 
         {
-            if((!(ne.LastIzq == null) || !(ne.FirstDer == null)) && error.equals("File read successfully"))
+            if(!(ne.LastIzq == null) || !(ne.FirstDer == null))
             {
                for(String hoja : ne.LastIzq)
                {
@@ -2559,9 +2560,14 @@ public class Archivo
         }
         for(String element : hojas)
         {
-            TablaFollow.add(element + ": " + follows.get(contador).toString());
+            String nex = element + ": " + follows.get(contador).toString();
+            if(!TablaFollow.contains(nex))
+            {
+                TablaFollow.add(element + ": " + follows.get(contador).toString());
+            }
             contador++;
         }
+        TablaFollow.sort(null);
     }
     // </editor-fold>
     
