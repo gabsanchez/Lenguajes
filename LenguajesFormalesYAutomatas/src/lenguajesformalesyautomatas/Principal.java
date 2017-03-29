@@ -160,6 +160,8 @@ public class Principal extends javax.swing.JFrame {
                     ta_FirstLast.append("   Nulable:"+entrada.FirstLast.get(i).bNulable);
                     ta_FirstLast.append("\n");
                 }
+                entrada.CalcularFollow();
+                entrada.OrdenarLista(entrada.TablaFollow);
                 ta_FirstLast.append("\n");
                 ta_FirstLast.append("FOLLOW");
                 ta_FirstLast.append("\n");

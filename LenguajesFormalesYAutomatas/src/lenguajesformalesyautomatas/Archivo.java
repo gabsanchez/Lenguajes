@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Comparator;
+//import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 /**
@@ -63,6 +63,8 @@ public class Archivo
             //Evaluar tokens para el automata.
             if (error.equals("File read successfully.")) {
                 FirstLastFollow();
+                //CalcularFollow();
+                //OrdenarLista(TablaFollow);
             }
         }
         else
@@ -2315,8 +2317,8 @@ public class Archivo
                     }
             }
         }
-        CalcularFollow();
-        OrdenarLista(TablaFollow);
+        //CalcularFollow();
+        //OrdenarLista(TablaFollow);
     }
     
     public NodoExpresion Agregar(String Element)
@@ -2531,22 +2533,23 @@ public class Archivo
         List<String> hojas = new ArrayList();
         List<List<String>> follows = new ArrayList();
         int contador = 0;
-        for (NodoExpresion ne : FirstLast) 
+        for (NodoExpresion nodo : FirstLast) 
         {
-            if(!(ne.LastIzq == null) || !(ne.FirstDer == null))
+            //NodoExpresion nodo = ne;
+            if(!(nodo.LastIzq == null) || !(nodo.FirstDer == null))
             {
-               for(String hoja : ne.LastIzq)
+               for(String hoja : nodo.LastIzq)
                {
                    if(!hojas.contains(hoja))
                    {
                        hojas.add(hoja);
-                       follows.add(ne.FirstDer);
+                       follows.add(nodo.FirstDer);
                    }
                    else
                    {
                        int indice = hojas.indexOf(hoja);
                        List<String> auxiliar = follows.get(indice);
-                       for(String f : ne.FirstDer)
+                       for(String f : nodo.FirstDer)
                        {
                            if(!auxiliar.contains(f))
                            {
