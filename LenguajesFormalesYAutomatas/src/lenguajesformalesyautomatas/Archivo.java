@@ -10,9 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
-import java.util.Hashtable;
 /**
  *
  * @author gabriel
@@ -185,12 +185,12 @@ public class Archivo
                         case "e":
                         {
                             cont++;
-                            Leer(nombreArchivo, 4, cont);
+                            Leer(nombreArchivo, 5, cont);
                             caracterA = new String(buffer).toLowerCase();
-                            if (caracterA.equals("rror")) 
+                            if (caracterA.equals("rror ")||caracterA.equals("rror\t")||caracterA.equals("rror\n")||caracterA.equals("rror\r")) 
                             {
                                 //seccion de error
-                                cont = cont + 4;
+                                cont = cont + 5;
                                 cont = AnalizarError(cont);
                                 if (error.equals("")||error.equals("File read successfully.")) 
                                 {
@@ -310,7 +310,7 @@ public class Archivo
             }
             else if (banderaNumero) //Buscar caracter '='
             {
-                cont = ComerEspacio(cont);
+                cont = SaltarEspacios(cont);
                 Leer(nombreArchivo, 1, cont);
                 caracterA = new String(buffer).toLowerCase();
                 if (caracterA.equals("=")) 
@@ -332,9 +332,9 @@ public class Archivo
                         {
                             case "a":
                                 flag++;
-                                Leer(nombreArchivo, 7, flag);
+                                Leer(nombreArchivo, 8, flag);
                                 caracterA = new String(buffer).toLowerCase();
-                                if (caracterA.equals("cciones")) 
+                                if (caracterA.equals("cciones ")||caracterA.equals("cciones\t")||caracterA.equals("cciones\n")||caracterA.equals("cciones\r")) 
                                 {
                                     CalcularFilaColumna(cont);
                                     error = "';' expected. Row: " + filaError + " Columna: " + columnaError;
@@ -1099,12 +1099,12 @@ public class Archivo
             }
             else if (caracterA.equals("e")) {
                 cont++;
-                Leer(nombreArchivo, 4, cont);
+                Leer(nombreArchivo, 5, cont);
                 caracterA = new String(buffer).toLowerCase();
-                if (caracterA.equals("rror"))
+                if (caracterA.equals("rror ")||caracterA.equals("rror\t")||caracterA.equals("rror\n")||caracterA.equals("rror\r"))
                 {
                     //seccion de error
-                    cont =  cont+4;
+                    cont =  cont+5;
                     cont = AnalizarError(cont);
                     banderaFin=true;
                 }
@@ -1802,9 +1802,9 @@ public class Archivo
                                     case "a":
                                     {
                                         cont++;
-                                        Leer(nombreArchivo, 7, cont);
+                                        Leer(nombreArchivo, 8, cont);
                                         caracterA = new String(buffer).toLowerCase();
-                                        if (caracterA.equals("cciones")) 
+                                        if (caracterA.equals("cciones ")||caracterA.equals("cciones\t")||caracterA.equals("cciones\n")||caracterA.equals("cciones\r")) 
                                         {
                                             Leer(nombreArchivo, 1, posBandera);
                                             String caracterBandera = new String(buffer).toLowerCase();
@@ -1992,7 +1992,7 @@ public class Archivo
             Leer(nombreArchivo, tam, aux);
             nombre = new String(buffer).toLowerCase();
             AgregarIDToken(nombre, cont);
-            cont = ComerEspacio(cont);
+            cont = SaltarEspacios(cont);
             Leer(nombreArchivo, 1, cont);
             caracterA = new String(buffer).toLowerCase();
             if(!caracterA.equals("]"))
@@ -2314,9 +2314,9 @@ public class Archivo
                         break;
                     }
             }
-            CalcularFollow();
         }
- 
+        CalcularFollow();
+        OrdenarLista(TablaFollow);
     }
     
     public NodoExpresion Agregar(String Element)
@@ -2567,8 +2567,35 @@ public class Archivo
             }
             contador++;
         }
-        TablaFollow.sort(null);
+        //TablaFollow.sort(null);
+        //OrdenarLista(TablaFollow);
     }
+    public void OrdenarLista(List<String> lista) 
+    {
+      boolean cambiado = true;
+      int j = 0;
+      String tmp;
+      while (cambiado) 
+      {
+            cambiado = false;
+            j++;
+            for (int i = 0; i < lista.size() - j; i++) 
+            {
+                int num1 = Integer.parseInt(lista.get(i).substring(0, lista.get(i).indexOf(":")));
+                int num2 = Integer.parseInt(lista.get(i+1).substring(0, lista.get(i+1).indexOf(":")));
+                  if (num1 > num2) 
+                  {                          
+                        tmp = lista.get(i);
+                        lista.set(i, lista.get(i + 1));
+                        lista.set(i + 1, tmp);
+                        cambiado = true;
+                  }
+            }                
+      }
+}
+    /*Comparator<String> comp = (String a, String b) ->{ 
+        return a.substring(0, a.indexOf(":")+1).compareTo(b.substring(0, b.indexOf(":")+1));
+    };*/
     // </editor-fold>
     
     
