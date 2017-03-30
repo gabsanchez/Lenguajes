@@ -2548,7 +2548,13 @@ public class Archivo
                    else
                    {
                        int indice = hojas.indexOf(hoja);
-                       List<String> auxiliar = follows.get(indice);
+                       List<String> auxiliar = new ArrayList();
+                       int cont = 0;
+                       for(String s : follows.get(indice))
+                       {
+                           auxiliar.add(s);
+                           cont++;
+                       }
                        for(String f : nodo.FirstDer)
                        {
                            if(!auxiliar.contains(f))
