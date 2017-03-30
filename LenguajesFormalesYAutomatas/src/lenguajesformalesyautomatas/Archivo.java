@@ -1734,7 +1734,20 @@ public class Archivo
                     {
                         if(bandera)
                         {
-                            cont = EvaluarExpresion(inicio, cont);
+                            long auxiliar;
+                            long temporal;
+                            auxiliar= cont + 1;
+                            Leer(nombreArchivo, 1, auxiliar);
+                            String cerradura = new String(buffer).toLowerCase();
+                            while(cerradura.equals("*") || cerradura.equals("+"))
+                            {
+                                auxiliar++;
+                                auxiliar = SaltarEspacios(auxiliar);
+                                Leer(nombreArchivo, 1, auxiliar);
+                                cerradura = new String(buffer).toLowerCase();
+                            }
+                            temporal = EvaluarExpresion(inicio, cont);
+                            cont = auxiliar -1;
                             //cont--;
                         }
                         else
@@ -1749,8 +1762,20 @@ public class Archivo
                     {
                         if(bandera)
                         {
-                            cont = EvaluarExpresion(inicio, cont);
-                            //cont--;
+                            long auxiliar;
+                            long temporal;
+                            auxiliar= cont + 1;
+                            Leer(nombreArchivo, 1, auxiliar);
+                            String cerradura = new String(buffer).toLowerCase();
+                            while(cerradura.equals("*") || cerradura.equals("+"))
+                            {
+                                auxiliar++;
+                                auxiliar = SaltarEspacios(auxiliar);
+                                Leer(nombreArchivo, 1, auxiliar);
+                                cerradura = new String(buffer).toLowerCase();
+                            }
+                            temporal = EvaluarExpresion(inicio, cont);
+                            cont = auxiliar -1;
                         }
                         else
                         {
