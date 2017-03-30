@@ -1739,7 +1739,7 @@ public class Archivo
                             auxiliar= cont + 1;
                             Leer(nombreArchivo, 1, auxiliar);
                             String cerradura = new String(buffer).toLowerCase();
-                            while(cerradura.equals("*") || cerradura.equals("+"))
+                            while(cerradura.equals("*") || cerradura.equals("+") || cerradura.equals("?"))
                             {
                                 auxiliar++;
                                 auxiliar = SaltarEspacios(auxiliar);
@@ -1767,7 +1767,7 @@ public class Archivo
                             auxiliar= cont + 1;
                             Leer(nombreArchivo, 1, auxiliar);
                             String cerradura = new String(buffer).toLowerCase();
-                            while(cerradura.equals("*") || cerradura.equals("+"))
+                            while(cerradura.equals("*") || cerradura.equals("+") || cerradura.equals("?"))
                             {
                                 auxiliar++;
                                 auxiliar = SaltarEspacios(auxiliar);
