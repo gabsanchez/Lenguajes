@@ -2527,7 +2527,7 @@ public class Archivo
         FirstLast.add(Final);
     }
     
-    public List<String> TablaFollow = new ArrayList();
+    public List<String> TablaFollow = new ArrayList();    
     public void CalcularFollow()
     {
         List<String> hojas = new ArrayList();
