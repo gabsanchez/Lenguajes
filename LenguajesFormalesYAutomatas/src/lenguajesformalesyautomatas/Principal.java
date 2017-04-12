@@ -172,6 +172,17 @@ public class Principal extends javax.swing.JFrame {
                     ta_FirstLast.append(follow);
                     ta_FirstLast.append("\n");
                 }
+                
+                entrada.TablaTransiciones();
+                ta_FirstLast.append("\n");
+                ta_FirstLast.append("ESTADOS");
+                ta_FirstLast.append("\n");
+                ta_FirstLast.append("\n");
+                for (int i = 0; i < entrada.LTransicionM.size()-1; i++) 
+                {
+                    ta_FirstLast.append(entrada.LTransicionM.get(i).EstadoInicial+"|"+entrada.LTransicionM.get(i).Elemento+"|"+entrada.LTransicionM.get(i).EstadoFinal);
+                    ta_FirstLast.append("\n");
+                }
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 

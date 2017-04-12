@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 //import java.util.Comparator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.Stack;
 /**
  *
@@ -63,8 +64,7 @@ public class Archivo
             //Evaluar tokens para el automata.
             if (error.equals("File read successfully.")) {
                 FirstLastFollow();
-                //CalcularFollow();
-                //OrdenarLista(TablaFollow);
+                
             }
         }
         else
@@ -2317,8 +2317,6 @@ public class Archivo
                     }
             }
         }
-        //CalcularFollow();
-        //OrdenarLista(TablaFollow);
     }
     
     public NodoExpresion Agregar(String Element)
@@ -2359,25 +2357,6 @@ public class Archivo
                 if (Nombre.endsWith(";")) {
                     Nombre =Aux;
                 }
-                //cont++;
-                //String Aux=Nombre + Expresion.charAt(cont);
-                //while(!posibleconjunto)
-                //{
-                //    if (!ConjuntosDeclarados.contains(Aux)) 
-                //    {
-                //        if (Aux.endsWith(";")) {
-                //            posibleconjunto=true;
-                //            break;
-                //        }
-                //        cont++;
-                //        Aux = Aux + Expresion.charAt(cont);
-                //    }
-                //    else if(ConjuntosDeclarados.contains(Aux))
-                //   {
-                //        posibleconjunto=true;
-                //        Nombre=Aux;
-                //    }
-                //}
             }
         }
         return Nombre;
@@ -2576,8 +2555,6 @@ public class Archivo
             }
             contador++;
         }
-        //TablaFollow.sort(null);
-        //OrdenarLista(TablaFollow);
     }
     public void OrdenarLista(List<String> lista) 
     {
@@ -2601,11 +2578,194 @@ public class Archivo
                   }
             }                
       }
-}
-    /*Comparator<String> comp = (String a, String b) ->{ 
-        return a.substring(0, a.indexOf(":")+1).compareTo(b.substring(0, b.indexOf(":")+1));
-    };*/
+    }
+    
+    List<Hoja> LHojas = new ArrayList();
+    List<Follow> LFollow = new ArrayList();
+    List<List<String>> Estados = new ArrayList();
+    List<Transicion> LTransicion =  new ArrayList();
+    List<Transicion> LTransicionM =  new ArrayList();
+    public void TablaTransiciones()
+    {
+        //Crear Lista de Hojas
+        for (int i = 0; i < FirstLast.size(); i++) {
+            if (EsHoja(FirstLast.get(i))) {
+                Hoja H = new Hoja();
+                H.Elemento = FirstLast.get(i).Elemento;
+                H.First = FirstLast.get(i).First.get(0);
+                LHojas.add(H);
+            }
+        }
+        //Crear Lista de Follows
+        List<String> FollowLimpio = new ArrayList(); 
+        for (int i = 0; i < TablaFollow.size(); i++) {
+            FollowLimpio.add(TablaFollow.get(i).replace("[", "").replace("]", ""));
+        }
+        for (int i = 0; i < FollowLimpio.size(); i++) {
+            Follow F = new Follow();
+            F.Numero = FollowLimpio.get(i).split(":")[0];
+            String[] Aux = new String[FollowLimpio.get(i).split(":")[1].split(",").length];
+            Aux = FollowLimpio.get(i).split(":")[1].split(",");
+            for (int j = 0; j < Aux.length; j++) {
+                F.Follow.add(Aux[j].trim());
+            }
+            LFollow.add(F);
+        }
+        
+        List<String> EstadoCero =  new ArrayList();
+        //Obtener first de la raiz
+        EstadoCero = FirstLast.get(FirstLast.size()-1).First;
+        Estados.add(EstadoCero);
+        for (int i = 0; i < LHojas.size(); i++) {
+            for (int j = 0; j < EstadoCero.size(); j++) {
+                if (LHojas.get(i).First.equals(EstadoCero.get(j))) {
+                    Transicion T = new Transicion();
+                    T.Elemento = LHojas.get(i).Elemento;
+                    T.Transicion.add(LHojas.get(i).First);
+                    LTransicion.add(T);
+                }
+            }
+        }
+        
+        for (int i = 0; i < LTransicion.size(); i++) {
+            for (int j = 0; j < LTransicion.size(); j++) {
+                if (i!=j) {
+                    if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {
+                        LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
+                        LTransicion.remove(j);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for (int i = 0; i < LTransicion.size() ; i++) {
+            for (int j = 0; j < LTransicion.get(i).Transicion.size(); j++) {            
+                for (int k = 0; k < LFollow.size(); k++) {
+                    if (LTransicion.get(i).Transicion.get(j).equals(LFollow.get(k).Numero)) {                        
+                        for (int l = 0; l < LFollow.get(k).Follow.size(); l++) {
+                            LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (int i = 0; i < LTransicion.size(); i++) {
+            LTransicion.get(i).EstadoInicial = "S0";
+            LTransicionM.add(LTransicion.get(i));
+        }
+                
+        for (int i = 0; i < LTransicion.size(); i++) {
+            if (!Estados.contains(LTransicion.get(i).TransicionFollow)) {
+                Estados.add(LTransicion.get(i).TransicionFollow);
+            }
+            
+        }
+        LTransicion.clear();
+        
+        //S1...Sn
+        for (int m = 1; m < Estados.size(); m++) {
+            EstadoCero = Estados.get(m);
+            
+            for (int i = 0; i < LHojas.size(); i++) {
+                for (int j = 0; j < EstadoCero.size(); j++) {
+                    if (LHojas.get(i).First.equals(EstadoCero.get(j))) {
+                        Transicion T = new Transicion();
+                        T.Elemento = LHojas.get(i).Elemento;
+                        T.Transicion.add(LHojas.get(i).First);
+                        LTransicion.add(T);
+                    }
+                }
+            }
+
+            for (int i = 0; i < LTransicion.size(); i++) {
+                for (int j = 0; j < LTransicion.size(); j++) {
+                    if (i!=j) {
+                        if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {//revisar esto
+                            LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
+                            LTransicion.remove(j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < LTransicion.size() ; i++) {
+                for (int j = 0; j < LTransicion.get(i).Transicion.size(); j++) {            
+                    for (int k = 0; k < LFollow.size(); k++) {
+                        if (LTransicion.get(i).Transicion.get(j).equals(LFollow.get(k).Numero)) {                        
+                            for (int l = 0; l < LFollow.get(k).Follow.size(); l++) {
+                                LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < LTransicion.size(); i++) {
+                LTransicion.get(i).EstadoInicial = "S"+m;
+                LTransicionM.add(LTransicion.get(i));
+            }
+
+            for (int i = 0; i < LTransicion.size(); i++) {
+                if (!Estados.contains(LTransicion.get(i).TransicionFollow)) {
+                    if (!LTransicion.get(i).TransicionFollow.isEmpty()) {
+                        Estados.add(LTransicion.get(i).TransicionFollow);  
+                    }
+                }
+            }
+            LTransicion.clear();
+        }
+        
+        for (int i = 0; i < LTransicionM.size(); i++) {
+            for (int j = 0; j < Estados.size(); j++) {
+                boolean Banderita=false;
+                int k=0;
+                int TT=LTransicionM.get(i).TransicionFollow.size();
+                int TE=Estados.get(j).size();
+                while(!Banderita)
+                {
+                    
+                    if (k>TT-1) {
+                        break;
+                    }
+                    else if (k>TE-1) {
+                        break;
+                    }
+                    if (Integer.parseInt(LTransicionM.get(i).TransicionFollow.get(k)) != Integer.parseInt(Estados.get(j).get(k))) {
+                        Banderita=true;
+                        //LTransicionM.get(i).EstadoFinal="S"+j;
+                    }      
+                    k++;
+                }
+                if (!Banderita) {
+                    LTransicionM.get(i).EstadoFinal="S"+j;
+                }
+            }
+        }
+    }
+    
+    public boolean EsHoja(NodoExpresion Nodo)
+    {
+        boolean bandera = false;
+        if (Nodo.First.size() == 1) 
+        {
+            if (Nodo.Last.size() == 1) 
+            {
+                if (Nodo.FirstDer.isEmpty()) 
+                {
+                    if (Nodo.LastIzq.isEmpty()) 
+                    {
+                        if (!Nodo.Elemento.contains("+")&&!Nodo.Elemento.contains("*")&&!Nodo.Elemento.contains("?")) {
+                            bandera = true;   
+                        }
+                    }
+                }
+            }
+        }
+        return bandera;
+    }
     // </editor-fold>
-    
-    
+     
 }
