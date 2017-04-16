@@ -15,6 +15,7 @@ import java.util.Hashtable;
 public class NodoExpresion 
 {
     public String Elemento;
+    public int Token;
     public List<String> First = new ArrayList();
     public List<String> Last = new ArrayList();
     public boolean bNulable;

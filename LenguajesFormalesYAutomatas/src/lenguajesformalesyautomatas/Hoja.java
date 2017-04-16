@@ -13,4 +13,5 @@ package lenguajesformalesyautomatas;
 public class Hoja {
     public String Elemento;
     public String First;
+    public int Token;
 }

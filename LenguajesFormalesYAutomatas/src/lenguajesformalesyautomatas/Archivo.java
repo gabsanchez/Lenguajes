@@ -2177,8 +2177,10 @@ public class Archivo
     public void FirstLastFollow()
     {
         String TokenActual="";
+        int NTokenActual = 0;
         for (int i = 0; i < Tokens.size(); i++) {
             TokenActual = Tokens.get(i);
+            NTokenActual = Integer.parseInt(ListaNumeros.get(i).toString());
             char Elemento = ' ';
             for (int j = 0; j < TokenActual.length(); j++) 
             {
@@ -2193,8 +2195,8 @@ public class Archivo
                         contadorHoja++;
                         j++;
                         Elemento = TokenActual.charAt(j);
-                        Hoja.push(Agregar("'"+Elemento+"'"));
-                        FirstLast.add(Agregar("'"+Elemento+"'"));
+                        Hoja.push(Agregar("'"+Elemento+"'",NTokenActual));
+                        FirstLast.add(Agregar("'"+Elemento+"'",NTokenActual));
                         j++;
                     }
                     else if(Elemento == '"')
@@ -2208,8 +2210,8 @@ public class Archivo
                         contadorHoja++;
                         j++;
                         Elemento = TokenActual.charAt(j);
-                        Hoja.push(Agregar("'"+Elemento+"'"));
-                        FirstLast.add(Agregar("'"+Elemento+"'"));
+                        Hoja.push(Agregar("'"+Elemento+"'",NTokenActual));
+                        FirstLast.add(Agregar("'"+Elemento+"'",NTokenActual));
                         j++;
                     }
                     else if(Character.isLetter(Elemento)) //Es un conjunto
@@ -2222,8 +2224,8 @@ public class Archivo
                         //Armar el nombre del conjunto
                         contadorHoja++;
                         String Cojnuto = ArmarNombreConjunto(Elemento+"", TokenActual,j);
-                        Hoja.push(Agregar(Cojnuto));
-                        FirstLast.add(Agregar(Cojnuto));
+                        Hoja.push(Agregar(Cojnuto,NTokenActual));
+                        FirstLast.add(Agregar(Cojnuto,NTokenActual));
                         j=j+Cojnuto.length();
                         j--;
                     }
@@ -2344,10 +2346,11 @@ public class Archivo
         }
     }
     
-    public NodoExpresion Agregar(String Element)
+    public NodoExpresion Agregar(String Element, int T)
     {
         NodoExpresion E = new NodoExpresion();
         E.Elemento = Element;
+        E.Token = T;
         E.First.add(contadorHoja+"");
         E.Last.add(contadorHoja+"");
         E.bNulable = false;
@@ -2617,6 +2620,7 @@ public class Archivo
             if (EsHoja(FirstLast.get(i))) {
                 Hoja H = new Hoja();
                 H.Elemento = FirstLast.get(i).Elemento;
+                H.Token = FirstLast.get(i).Token;
                 H.First = FirstLast.get(i).First.get(0);
                 LHojas.add(H);
             }
@@ -2647,6 +2651,7 @@ public class Archivo
                     Transicion T = new Transicion();
                     T.Elemento = LHojas.get(i).Elemento;
                     T.Transicion.add(LHojas.get(i).First);
+                    T.Token = LHojas.get(i).Token;
                     LTransicion.add(T);
                 }
             }
@@ -2699,6 +2704,7 @@ public class Archivo
                         Transicion T = new Transicion();
                         T.Elemento = LHojas.get(i).Elemento;
                         T.Transicion.add(LHojas.get(i).First);
+                        T.Token = LHojas.get(i).Token;
                         LTransicion.add(T);
                     }
                 }
@@ -2743,6 +2749,11 @@ public class Archivo
             LTransicion.clear();
         }
         
+        List<Transicion> LTransicionAux =  new ArrayList();
+        for (int i = 0; i < LTransicionM.size(); i++) {
+            LTransicionAux.add(LTransicionM.get(i));
+        }
+        
         for (int i = 0; i < LTransicionM.size(); i++) {
             for (int j = 0; j < Estados.size(); j++) {
                 boolean Banderita=false;
@@ -2751,7 +2762,9 @@ public class Archivo
                 int TE=Estados.get(j).size();
                 while(!Banderita)
                 {
-                    
+                    if (TE==0) {
+                        Banderita=true;
+                    }
                     if (k>TT-1) {
                         break;
                     }
@@ -2760,7 +2773,6 @@ public class Archivo
                     }
                     if (Integer.parseInt(LTransicionM.get(i).TransicionFollow.get(k)) != Integer.parseInt(Estados.get(j).get(k))) {
                         Banderita=true;
-                        //LTransicionM.get(i).EstadoFinal="S"+j;
                     }      
                     k++;
                 }
@@ -2792,5 +2804,5 @@ public class Archivo
         return bandera;
     }
     // </editor-fold>
-     
+    
 }
