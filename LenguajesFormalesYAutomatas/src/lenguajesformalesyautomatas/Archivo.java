@@ -2805,4 +2805,34 @@ public class Archivo
     }
     // </editor-fold>
     
+    // <editor-fold defaultstate="collapsed" desc="Codigo">
+    List<String> TAcciones = new ArrayList();
+    public void AccionesNecesarias()
+    {
+        for (int i = 0; i < ContenidoAcciones.size(); i++) {
+            boolean Bandera = false;
+            if (Character.isLetter(ContenidoAcciones.get(i).toString().charAt(0))) // Si es letra que agregue todo los elementos siguientes
+            {
+                for (int j = 0; j < AccionesTokens.size(); j++) {
+                    if (ContenidoAcciones.get(i).toString().equals(AccionesTokens.get(j)+":")) {
+                        while(!Bandera)
+                        {
+                            i++;                            
+                            if (Character.isLetter(ContenidoAcciones.get(i).toString().charAt(0))) // Si es letra que agregue todo los elementos siguientes
+                            {
+                                Bandera = true;
+                            }
+                            else
+                            {
+                                TAcciones.add(ContenidoAcciones.get(i).toString());
+                            }
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
+        int m=0;
+    }
+    // </editor-fold>
 }

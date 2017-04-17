@@ -183,6 +183,7 @@ public class Principal extends javax.swing.JFrame {
                     ta_FirstLast.append(entrada.LTransicionM.get(i).EstadoInicial+"|"+entrada.LTransicionM.get(i).Elemento+","+entrada.LTransicionM.get(i).Token+"|"+entrada.LTransicionM.get(i).EstadoFinal);
                     ta_FirstLast.append("\n");
                 }
+                entrada.AccionesNecesarias();
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 
