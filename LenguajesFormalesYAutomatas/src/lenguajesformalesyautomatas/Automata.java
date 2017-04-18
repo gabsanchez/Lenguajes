@@ -93,26 +93,34 @@ public class Automata {
         int contador = 0;
         for(String s : Estados)
         {
-            salida = salida + "case " + s + ":\n" +
-            "            {\n" +
-            "                " + Subcaso(contador) + "\n" +
-            "            }\n";
+            salida = salida + "case \" + s + \":\n" +
+                    "            {\n" +
+                    "                switch(palabra[contador])\n" +
+                    "                {\n" +
+                    "                    " + CasosTokens(contador) + "\n" +
+                    "                }\n" +
+                    "                break;\n" +
+                    "            }";
             contador++;
         }
         return salida;
     }
-    private String Subcaso(int cont)
+    private String CasosTokens(int cont)
     {
         String subcaso = "";
-        for(String trans : Transiciones.get(cont))//interior del if
+        int contador = 0;
+        for(String trans : Transiciones.get(cont))
         {
-            subcaso = CondicionArmada(trans);
+            String[] aux = trans.split("|");
+            subcaso = subcaso + "case \"" + aux[0].split(",")[0] + "\":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+"                    {\n" +
+"                        tacos = " + aux[0].split(",")[1] + ";\n" +
+"                        estado = " + aux[1].substring(1) + ";\n" +
+"                        break;\n" +
+"                    }\n" +
+"                    ";
         }
         return subcaso;
-    }
-    private String CondicionArmada(String tr)
-    {
-        return "if(" + Condicion(tr) + ")";
     }
     private String Condicion(String t)
     {
@@ -120,17 +128,13 @@ public class Automata {
         String[] aux = t.split("|");
         if(condicion.equals(""))
         {
-            condicion = "Token == " + aux[0].split(",")[1];
+            condicion = "Token == " + aux[0].split(",")[1].split("|")[0];
         }
         else
         {
             condicion = " || Token == " + aux[0].split(",")[1];
         }
         return condicion;
-    }
-    private String Sentencia()
-    {
-        
     }
     private String ListaCadena(List<String> lista)
     {
