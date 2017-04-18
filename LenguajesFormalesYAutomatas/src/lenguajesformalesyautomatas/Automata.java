@@ -86,6 +86,54 @@ public class Automata {
         "        }\n" +
         "    }\n" +
         "}");
+        fwCS.write("private int Tomatoken(string palabra)\n" +
+        "{\n" +
+        "    int estado = 0;\n" +
+        "    int contador = 0;\n" +
+        "    int tacos = 0; //token\n" +
+        "    string[] Reservadas = {" + ListaCadena(Reservadas) + "};\n" +
+        "    long[] numReservadas = new long[Reservadas.Count];\n" +
+        "    string salida = \"\";\n" +
+        "    //Verificar si la palabara es reservada\n" +
+        "    for (int i = 0; i < Reservadas.Count; i++)\n" +
+        "    {\n" +
+        "        string[] aux = Reservadas[i].split('=');\n" +
+        "        numReservadas[i] = Convert.ToInt64(aux[0]);\n" +
+        "        if(aux.Count > 2)\n" +
+        "        {\n" +
+        "            string pal = \"\";\n" +
+        "            for(int j = 1; j < aux.Count; j++)\n" +
+        "            {\n" +
+        "                pal = pal + aux[j] + \"=\";\n" +
+        "            }\n" +
+        "            pal = pal.Substring(1, pal.Length - 2);\n" +
+        "            Reservadas[i] = pal;\n" +
+        "        }\n" +
+        "        else\n" +
+        "        {\n" +
+        "            Reservadas[i] = aux[1].Substring(1, aux[1].Length - 1);\n" +
+        "        }\n" +
+        "    }\n" +
+        "    for (int i = 0; i < Reservadas.Count; i++)\n" +
+        "    {\n" +
+        "        if(palabra = Reservadas[i])\n" +
+        "        {\n" +
+        "            salida = salida + palabra + \"=\" + numReservadas[i] + \"\\n\";\n" +
+        "        }\n" +
+        "    }\n" +
+        "    while(contador < palabra.length)\n" +
+        "    {\n" +
+        "        switch(estado)\n" +
+        "        {\n" +
+        "            " + CasosEstados() + "\n" +
+        "            \n" +
+        "            default:\n" +
+        "            {\n" +
+        "                break;\n" +
+        "            }\n" +
+        "        }\n" +
+        "    }\n" +
+        "}");
     }
     private String CasosEstados()
     {
@@ -112,17 +160,20 @@ public class Automata {
         for(String trans : Transiciones.get(cont))
         {
             String[] aux = trans.split("|");
-            subcaso = subcaso + "case \"" + aux[0].split(",")[0] + "\":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
-"                    {\n" +
-"                        tacos = " + aux[0].split(",")[1] + ";\n" +
-"                        estado = " + aux[1].substring(1) + ";\n" +
-"                        break;\n" +
-"                    }\n" +
-"                    ";
+            if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
+            {
+                subcaso = subcaso + "case \"" + aux[0].split(",")[0] + "\":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+    "                    {\n" +
+    "                        tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                        estado = " + aux[1].substring(1) + ";\n" +
+    "                        break;\n" +
+    "                    }\n" +
+    "                    ";
+            }
         }
         return subcaso;
     }
-    private String Condicion(String t)
+    /*private String Condicion(String t)
     {
         String condicion = "";
         String[] aux = t.split("|");
@@ -135,7 +186,7 @@ public class Automata {
             condicion = " || Token == " + aux[0].split(",")[1];
         }
         return condicion;
-    }
+    }*/
     private String ListaCadena(List<String> lista)
     {
         String salida = "";
