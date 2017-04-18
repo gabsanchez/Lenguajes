@@ -141,14 +141,16 @@ public class Automata {
         int contador = 0;
         for(String s : Estados)
         {
-            salida = salida + "case \" + s + \":\n" +
+            salida = salida + "case " + s + ":\n" +
                     "            {\n" +
                     "                switch(palabra[contador])\n" +
                     "                {\n" +
                     "                    " + CasosTokens(contador) + "\n" +
                     "                }\n" +
                     "                break;\n" +
-                    "            }";
+                    "            }\n" +
+                    "           default :\n" +
+                    "               break;";
             contador++;
         }
         return salida;
