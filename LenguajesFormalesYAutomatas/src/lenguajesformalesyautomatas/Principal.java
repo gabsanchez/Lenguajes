@@ -184,6 +184,7 @@ public class Principal extends javax.swing.JFrame {
                     ta_FirstLast.append("\n");
                 }
                 entrada.AccionesNecesarias();
+                entrada.CodigoConjuntos();
             }
             JOptionPane.showMessageDialog(rootPane, entrada.error);
         } 

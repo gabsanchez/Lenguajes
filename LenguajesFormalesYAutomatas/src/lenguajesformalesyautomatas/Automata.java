@@ -128,10 +128,7 @@ public class Automata {
         }
         return condicion;
     }
-    private String Sentencia()
-    {
-        
-    }
+    
     private String ListaCadena(List<String> lista)
     {
         String salida = "";

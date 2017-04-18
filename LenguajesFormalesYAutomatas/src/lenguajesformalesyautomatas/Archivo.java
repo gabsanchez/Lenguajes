@@ -44,7 +44,7 @@ public class Archivo
     
     List<String> ConjuntosLlamados = new ArrayList();
     List ConjuntosDeclarados = new ArrayList();
-    List Elementos = new ArrayList();
+    List<String> Elementos = new ArrayList();
     List CHR = new ArrayList();
     
     List<String> CaracteresTokens;
@@ -2838,7 +2838,89 @@ public class Archivo
                 }
             }
         }
-        int m=0;
+    }
+    
+    public void CodigoConjuntos()
+    { 
+        String Code="";
+        for (int i = 0; i < ConjuntosDeclarados.size(); i++) {
+            String[] Contenido = new String[1];
+            String Cont="";
+            if (!Elementos.get(i).toString().contains("+")) {
+                Contenido[0] = Elementos.get(i).toString();
+            }
+            else
+            {
+                //String usefulData = Elementos.get(i).toString();
+                //String[] list = null;
+                //String token = "+";
+                //list = usefulData.split(token);
+                Cont = Elementos.get(i);
+                Contenido = new String[Cont.split("\\+").length];
+                Contenido = Cont.split("\\+");                
+            }
+            Code+="public List<int> "+ConjuntosDeclarados.get(i)+" = new List<int>();\n";
+            Code+="public void Llenar"+ConjuntosDeclarados.get(i)+"()\n";
+            Code+="{\n";
+            for (int j = 0; j < Contenido.length; j++) {
+                if (Contenido[j].contains("..")) {
+                    String puntos="";
+                    String[] Limites = new String[2];
+                    int Asccii1=0, Asccii2=0;
+                    //Limites =Contenido[j].split("..");
+                    Limites[0]=Contenido[j].substring(0,Contenido[j].indexOf("."));
+                    Limites[1]=Contenido[j].substring(Contenido[j].indexOf(".")+2,Contenido[j].length());
+                    //Limite 1
+                    if (Limites[0].startsWith("'")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("\"")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("c")) {
+                        String num="";
+                        //num = Limites[0].split("(")[1].split(")")[0];
+                        num = Limites[0].substring( Limites[0].indexOf("(")+1, Limites[0].indexOf(")"));
+                        Asccii1 = Integer.parseInt(num);
+                    }
+                    //Limite 2
+                    if (Limites[1].startsWith("'")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("\"")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("c")) {
+                        String num="";
+                        num = Limites[1].substring( Limites[1].indexOf("(")+1,  Limites[1].indexOf(")"));
+                        Asccii2 = Integer.parseInt(num);
+                    }
+                    for (int k = Asccii1; k < Asccii2+1; k++) {
+                        Code+="\t"+ConjuntosDeclarados.get(i)+".Add("+k+");\n";
+                    }
+                }
+                else
+                {
+                    int Asccii=0;
+                    if (Contenido[j].startsWith("'")||Contenido[j].startsWith("\"")) 
+                    {
+                        Asccii = (int)Contenido[j].charAt(1);
+                        Code+="\t"+ConjuntosDeclarados.get(i)+".Add("+Asccii+");\n";
+                    }
+                    else if (Contenido[j].startsWith("c")) 
+                    {
+                        String num="";
+                        num = Contenido[j].substring(Contenido[j].indexOf("(")+1, Contenido[j].indexOf(")"));
+                        Asccii = Integer.parseInt(num);
+                    }
+                    
+                    
+                    
+                    Code+="\t"+ConjuntosDeclarados.get(i)+".Add("+Asccii+");\n";
+                }
+            }
+            Code+="}\n";
+        }
     }
     // </editor-fold>
 }
