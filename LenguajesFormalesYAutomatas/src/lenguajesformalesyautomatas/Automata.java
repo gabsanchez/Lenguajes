@@ -18,25 +18,39 @@ public class Automata {
     List<String> Estados = new ArrayList();
     List<List<String>> Transiciones = new ArrayList();
     List<String> Reservadas = new ArrayList();
+    List<String> Conjuntos = new ArrayList();
+    List<String> Elementos = new ArrayList();
     FileWriter fwCS;
     FileWriter fwCPP;
     String codigo;
-    public Automata(List<String> estados, List<String> res, String nombre) throws IOException
+    public Automata(List<String> estados, List<String> reservadas, List<String> conjuntos, List<String> elementos, String nombre) throws IOException
     {
         for(String s : estados)
         {
-            String[] aux = s.split("|");
+            String[] aux = s.split("\\|");
             Estados.add(aux[0].substring(1));//Los estados están escritos como "S0, S1..." entonces obtenemos solamente el número sin la "S"
             List<String> temporal = new ArrayList();
             for(String e : estados)
             {
-                String[] aux1 = e.split("|");
+                String[] aux1 = e.split("\\|");
                 if(aux1[0].equals(aux[0]))
                 {
                     temporal.add(aux1[1] + "|" + aux1[2]);
                 }
             }
             Transiciones.add(temporal);
+        }
+        for(String c : conjuntos)
+        {
+            Conjuntos.add(c);
+        }
+        for(String e : elementos)
+        {
+            Elementos.add(e);
+        }
+        for(String r : reservadas)
+        {
+            Reservadas.add(r);
         }
         fwCS = new FileWriter(nombre + ".cs");
         fwCPP = new FileWriter(nombre + ".cpp");
@@ -80,20 +94,23 @@ public class Automata {
         "        linea = lectorArchivo.ReadLine();\n" +
         "        //Separamos cada palabra por caracteres vacíos (espacios, saltos de línea y tabulaciones)\n" +
         "        string[] palabras = linea.split(vacios);\n" +
+        "        StreamWriter Escritor = new StreamWriter(nombreArchivo.Substring(0,nombreArchivo.IndexOf(\".\")-1)+\"_out.txt\");" +
         "        foreach (string s in palabras)\n" +
         "        {\n" +
-        "            Tomatoken(s);\n" +
+        "            Escritor.WriteLine(s + \" = \" + Tomatoken(s));\n" +
+        "            Escritor.Close();\n" +
         "        }\n" +
         "    }\n" +
         "}");
+        fwCS.write(CodigoConjuntos());
         fwCS.write("private int Tomatoken(string palabra)\n" +
         "{\n" +
         "    int estado = 0;\n" +
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
-        "    string[] Reservadas = {" + ListaCadena(Reservadas) + "};\n" +
+        "    string[] Reservadas = " + ListaCadena(Reservadas) + ";\n" +
         "    long[] numReservadas = new long[Reservadas.Count];\n" +
-        "    string salida = \"\";\n" +
+        "    //string salida = \"\";\n" +
         "    //Verificar si la palabara es reservada\n" +
         "    for (int i = 0; i < Reservadas.Count; i++)\n" +
         "    {\n" +
@@ -118,7 +135,7 @@ public class Automata {
         "    {\n" +
         "        if(palabra = Reservadas[i])\n" +
         "        {\n" +
-        "            salida = salida + palabra + \"=\" + numReservadas[i] + \"\\n\";\n" +
+        "            tacos = numReservadas[i];\n" +
         "        }\n" +
         "    }\n" +
         "    while(contador < palabra.length)\n" +
@@ -133,7 +150,9 @@ public class Automata {
         "            }\n" +
         "        }\n" +
         "    }\n" +
+        "  return tacos;\n" +
         "}");
+        fwCS.close();
     }
     private String CasosEstados()
     {
@@ -141,16 +160,17 @@ public class Automata {
         int contador = 0;
         for(String s : Estados)
         {
-            salida = salida + "case " + s + ":\n" +
-                    "            {\n" +
-                    "                switch(palabra[contador])\n" +
-                    "                {\n" +
-                    "                    " + CasosTokens(contador) + "\n" +
-                    "                }\n" +
-                    "                break;\n" +
-                    "            }\n" +
-                    "           default :\n" +
-                    "               break;";
+            if(contador == 0 || !Estados.get(contador).equals(Estados.get(contador-1)))
+            {
+                salida = salida + "case " + s + ":\n" +
+                        "            {\n" +
+                        "                switch(palabra[contador])\n" +
+                        "                {\n" +
+                        "                    " + CasosTokens(contador) + "\n" +
+                        "                }\n" +
+                        "                break;\n" +
+                        "            }\n";
+            }
             contador++;
         }
         return salida;
@@ -158,13 +178,13 @@ public class Automata {
     private String CasosTokens(int cont)
     {
         String subcaso = "";
-        int contador = 0;
+        String difolt = "";
         for(String trans : Transiciones.get(cont))
         {
-            String[] aux = trans.split("|");
+            String[] aux = trans.split("\\|");
             if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
             {
-                subcaso = subcaso + "case \"" + aux[0].split(",")[0] + "\":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+                subcaso = subcaso + "case " + aux[0].split(",")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
     "                    {\n" +
     "                        tacos = " + aux[0].split(",")[1] + ";\n" +
     "                        estado = " + aux[1].substring(1) + ";\n" +
@@ -172,8 +192,35 @@ public class Automata {
     "                    }\n" +
     "                    ";
             }
+            else
+            {
+                if(!aux[0].split(",")[0].equals("#"))
+                {
+                    if(difolt.equals(""))
+                    {
+                        difolt = difolt + "if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
+    "                         {\n" +
+    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                         }\n";
+                    }
+                    else
+                    {
+                        difolt = difolt + "                 else if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
+    "                         {\n" +
+    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                         }\n";
+                    }
+                }
+            }
         }
-        return subcaso;
+        difolt = "default:\n" +
+"                     {\n" +
+"                         " + difolt + "\n" +
+"                         break;\n" +
+"                     }\n";
+        return subcaso + difolt;
     }
     /*private String Condicion(String t)
     {
@@ -190,14 +237,118 @@ public class Automata {
         return condicion;
     }*/
 
-    private String ListaCadena(List<String> lista)
+    private String ListaCadena(List<String> lista)//se convierte una lista a un string
     {
         String salida = "";
-        for(String s : lista)
+        if(lista.isEmpty())
         {
-            salida = salida + ",";
+            return "null";
         }
-        salida = salida.substring(0, salida.length() - 1);
-        return salida;
+        else
+        {
+            if(lista.size() == 1)
+            {
+                salida = lista.get(0);
+            }
+            else
+            {
+                for(String s : lista)
+                {
+                    if(salida.equals(""))
+                    {
+                        salida = s;
+                    }
+                    else
+                    {
+                        salida = salida + ", " + s;
+                    }
+                }
+            }
+            salida = "{" + salida + "}";
+            return salida;
+        }
+    }
+    public String CodigoConjuntos()
+    { 
+        String Code="";
+        for (int i = 0; i < Conjuntos.size(); i++) {
+            String[] Contenido = new String[1];
+            String Cont="";
+            if (!Elementos.get(i).toString().contains("+")) {
+                Contenido[0] = Elementos.get(i).toString();
+            }
+            else
+            {
+                //String usefulData = Elementos.get(i).toString();
+                //String[] list = null;
+                //String token = "+";
+                //list = usefulData.split(token);
+                Cont = Elementos.get(i);
+                Contenido = new String[Cont.split("\\+").length];
+                Contenido = Cont.split("\\+");                
+            }
+            Code+="public List<int> "+Conjuntos.get(i)+" = new List<int>();\n";
+            Code+="public void Llenar"+Conjuntos.get(i)+"()\n";
+            Code+="{\n";
+            for (int j = 0; j < Contenido.length; j++) {
+                if (Contenido[j].contains("..")) {
+                    String puntos="";
+                    String[] Limites = new String[2];
+                    int Asccii1=0, Asccii2=0;
+                    //Limites =Contenido[j].split("..");
+                    Limites[0]=Contenido[j].substring(0,Contenido[j].indexOf("."));
+                    Limites[1]=Contenido[j].substring(Contenido[j].indexOf(".")+2,Contenido[j].length());
+                    //Limite 1
+                    if (Limites[0].startsWith("'")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("\"")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("c")) {
+                        String num="";
+                        //num = Limites[0].split("(")[1].split(")")[0];
+                        num = Limites[0].substring( Limites[0].indexOf("(")+1, Limites[0].indexOf(")"));
+                        Asccii1 = Integer.parseInt(num);
+                    }
+                    //Limite 2
+                    if (Limites[1].startsWith("'")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("\"")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("c")) {
+                        String num="";
+                        num = Limites[1].substring( Limites[1].indexOf("(")+1,  Limites[1].indexOf(")"));
+                        Asccii2 = Integer.parseInt(num);
+                    }
+                    for (int k = Asccii1; k < Asccii2+1; k++) {
+                        Code+="\t"+Conjuntos.get(i)+".Add("+k+");\n";
+                    }
+                }
+                else
+                {
+                    int Asccii=0;
+                    if (Contenido[j].startsWith("'")||Contenido[j].startsWith("\"")) 
+                    {
+                        Asccii = (int)Contenido[j].charAt(1);
+                        Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
+                    }
+                    else if (Contenido[j].startsWith("c")) 
+                    {
+                        String num="";
+                        num = Contenido[j].substring(Contenido[j].indexOf("(")+1, Contenido[j].indexOf(")"));
+                        Asccii = Integer.parseInt(num);
+                    }
+                    
+                    
+                    
+                    Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
+                }
+            }
+            Code+="}\n";
+        }
+        return Code;
     }
 }
