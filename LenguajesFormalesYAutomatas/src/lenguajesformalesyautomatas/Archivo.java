@@ -2868,7 +2868,7 @@ public class Archivo
     }
     private void LlenarListaTrans()
     {
-        for (int i = 0; i < LTransicionM.size()-1; i++) 
+        for (int i = 0; i < LTransicionM.size(); i++) 
         {
             String transi = LTransicionM.get(i).EstadoInicial+"|"+ LTransicionM.get(i).Elemento+","+ LTransicionM.get(i).Token+"|"+ LTransicionM.get(i).EstadoFinal + "|" + LTransicionM.get(i).Aceptacion;
             if(!ListaTrans.contains(transi))
@@ -3019,7 +3019,7 @@ public class Archivo
     }
     public void GenerarCodigoC() throws IOException
     {
-        Automata generadorC = new Automata(ListaTrans, TAcciones, ConjuntosDeclarados, Elementos, nombreArchivo.substring(0, nombreArchivo.indexOf(".")));
+        Automata generadorC = new Automata(ListaTrans, TAcciones, ConjuntosDeclarados, Elementos, nombreArchivo.substring(0, nombreArchivo.indexOf(".")), ListaNumeros.get(ListaNumeros.size()-1).toString());
         generadorC.EsbribirCodigoCS();
     }
     // </editor-fold>

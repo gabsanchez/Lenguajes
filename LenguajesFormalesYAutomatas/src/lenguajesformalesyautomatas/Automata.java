@@ -25,7 +25,8 @@ public class Automata {
     FileWriter fwCS;
     FileWriter fwCPP;
     String codigo;
-    public Automata(List<String> estados, List<String> reservadas, List<String> conjuntos, List<String> elementos, String nombre) throws IOException
+    String Error;
+    public Automata(List<String> estados, List<String> reservadas, List<String> conjuntos, List<String> elementos, String nombre, String error) throws IOException
     {
         for(String s : estados)
         {
@@ -56,6 +57,7 @@ public class Automata {
             r = r.replace("\"","-");
             Reservadas.add(r);
         }
+        Error = error;
         fwCS = new FileWriter(nombre + ".cs");
         fwCPP = new FileWriter(nombre + ".cpp");
         fwCS.write("");
@@ -150,6 +152,7 @@ public class Automata {
         "    }\n" +
         "    if(!reserved)\n" +
         "    {\n" +
+        "       palabra += \"#\"\n" +
         "       while(contador < palabra.Length)\n" +
         "       {\n" +
         "           switch(estado)\n" +
@@ -161,11 +164,12 @@ public class Automata {
         "                   break;\n" +
         "               }\n" +
         "           }\n" +
+        "           contador++;\n" +
         "       }\n" +
         "    }\n" +
         "  if(!aceptacion)\n" +
         "  {\n" +
-        "     throw new Exception(\"La palabra no pertenece al lenguaje.\");\n" +
+        "     return " + Error + ";\n" +
         "  }\n" +
         "  return tacos;\n" +
         "}");
