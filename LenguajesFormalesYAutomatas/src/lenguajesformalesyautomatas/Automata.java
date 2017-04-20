@@ -17,9 +17,11 @@ import java.util.List;
 public class Automata {
     List<String> Estados = new ArrayList();
     List<List<String>> Transiciones = new ArrayList();
+    List<String> Aceptaciones = new ArrayList();
     List<String> Reservadas = new ArrayList();
     List<String> Conjuntos = new ArrayList();
     List<String> Elementos = new ArrayList();
+    List<String> MetodosLlamar = new ArrayList();
     FileWriter fwCS;
     FileWriter fwCPP;
     String codigo;
@@ -39,6 +41,7 @@ public class Automata {
                 }
             }
             Transiciones.add(temporal);
+            Aceptaciones.add(aux[3]);
         }
         for(String c : conjuntos)
         {
@@ -50,6 +53,7 @@ public class Automata {
         }
         for(String r : reservadas)
         {
+            r = r.replace("\"","-");
             Reservadas.add(r);
         }
         fwCS = new FileWriter(nombre + ".cs");
@@ -93,13 +97,13 @@ public class Automata {
         "        // Se obtiene la siguiente linea\n" +
         "        linea = lectorArchivo.ReadLine();\n" +
         "        //Separamos cada palabra por caracteres vacíos (espacios, saltos de línea y tabulaciones)\n" +
-        "        string[] palabras = linea.split(vacios);\n" +
-        "        StreamWriter Escritor = new StreamWriter(nombreArchivo.Substring(0,nombreArchivo.IndexOf(\".\")-1)+\"_out.txt\");" +
+        "        string[] palabras = linea.Split(vacios);\n" +
+        "        StreamWriter Escritor = new StreamWriter(nombreArchivo.Substring(0,nombreArchivo.IndexOf(\".\")-1)+\"_out.txt\");\n" +
         "        foreach (string s in palabras)\n" +
         "        {\n" +
         "            Escritor.WriteLine(s + \" = \" + Tomatoken(s));\n" +
-        "            Escritor.Close();\n" +
         "        }\n" +
+        "        Escritor.Close();\n" +
         "    }\n" +
         "}");
         fwCS.write(CodigoConjuntos());
@@ -108,22 +112,25 @@ public class Automata {
         "    int estado = 0;\n" +
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
+        "    bool aceptacion = false;\n" +
         "    string[] Reservadas = " + ListaCadena(Reservadas) + ";\n" +
-        "    long[] numReservadas = new long[Reservadas.Count];\n" +
+        "    int[] numReservadas = new int[Reservadas.Length];\n" +
         "    //string salida = \"\";\n" +
+        "    " + LlamarMetodos() + "\n" +
         "    //Verificar si la palabara es reservada\n" +
-        "    for (int i = 0; i < Reservadas.Count; i++)\n" +
+        "    for (int i = 0; i < Reservadas.Length; i++)\n" +
         "    {\n" +
-        "        string[] aux = Reservadas[i].split('=');\n" +
-        "        numReservadas[i] = Convert.ToInt64(aux[0]);\n" +
-        "        if(aux.Count > 2)\n" +
+        "        Reservadas[i] = Reservadas[i].Replace(\'-\',\'\"\');\n" +
+        "        string[] aux = Reservadas[i].Split('=');\n" +
+        "        numReservadas[i] = Convert.ToInt32(aux[0]);\n" +
+        "        if(aux.Length > 2)\n" +
         "        {\n" +
         "            string pal = \"\";\n" +
-        "            for(int j = 1; j < aux.Count; j++)\n" +
+        "            for(int j = 1; j < aux.Length; j++)\n" +
         "            {\n" +
         "                pal = pal + aux[j] + \"=\";\n" +
         "            }\n" +
-        "            pal = pal.Substring(1, pal.Length - 2);\n" +
+        "            //pal = pal.Substring(1, pal.Length - 2);\n" +
         "            Reservadas[i] = pal;\n" +
         "        }\n" +
         "        else\n" +
@@ -131,14 +138,15 @@ public class Automata {
         "            Reservadas[i] = aux[1].Substring(1, aux[1].Length - 1);\n" +
         "        }\n" +
         "    }\n" +
-        "    for (int i = 0; i < Reservadas.Count; i++)\n" +
+        "    for (int i = 0; i < Reservadas.Length; i++)\n" +
         "    {\n" +
-        "        if(palabra = Reservadas[i])\n" +
+        "        if(palabra == Reservadas[i])\n" +
         "        {\n" +
         "            tacos = numReservadas[i];\n" +
+        "            break;\n" +
         "        }\n" +
         "    }\n" +
-        "    while(contador < palabra.length)\n" +
+        "    while(contador < palabra.Length)\n" +
         "    {\n" +
         "        switch(estado)\n" +
         "        {\n" +
@@ -150,6 +158,10 @@ public class Automata {
         "            }\n" +
         "        }\n" +
         "    }\n" +
+        "  if(!aceptacion)\n" +
+        "  {\n" +
+        "     throw new Exception(\"La palabra no pertenece al lenguaje.\");\n" +
+        "  }\n" +
         "  return tacos;\n" +
         "}");
         fwCS.close();
@@ -168,6 +180,7 @@ public class Automata {
                         "                {\n" +
                         "                    " + CasosTokens(contador) + "\n" +
                         "                }\n" +
+                        "                aceptacion = " + Aceptaciones.get(contador) + ";\n" +
                         "                break;\n" +
                         "            }\n";
             }
@@ -206,7 +219,8 @@ public class Automata {
                     }
                     else
                     {
-                        difolt = difolt + "                 else if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
+                        difolt = difolt +
+    "                         else if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
     "                         {\n" +
     "                             tacos = " + aux[0].split(",")[1] + ";\n" +
     "                             estado = " + aux[1].substring(1) + ";\n" +
@@ -248,12 +262,13 @@ public class Automata {
         {
             if(lista.size() == 1)
             {
-                salida = lista.get(0);
+                salida = "\"" + lista.get(0) + "\"";
             }
             else
             {
                 for(String s : lista)
                 {
+                    s = "\"" + s + "\"";
                     if(salida.equals(""))
                     {
                         salida = s;
@@ -287,8 +302,10 @@ public class Automata {
                 Contenido = new String[Cont.split("\\+").length];
                 Contenido = Cont.split("\\+");                
             }
+            String met = "Llenar"+Conjuntos.get(i)+"()";
+            MetodosLlamar.add(met + ";");
             Code+="public List<int> "+Conjuntos.get(i)+" = new List<int>();\n";
-            Code+="public void Llenar"+Conjuntos.get(i)+"()\n";
+            Code+="public void " + met;
             Code+="{\n";
             for (int j = 0; j < Contenido.length; j++) {
                 if (Contenido[j].contains("..")) {
@@ -351,4 +368,13 @@ public class Automata {
         }
         return Code;
     }
+    private String LlamarMetodos()
+    {
+        String salida = "";
+        for(String m : MetodosLlamar)
+        {
+            salida = salida + m + "\n";
+        }
+        return salida;
+    }       
 }

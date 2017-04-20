@@ -2844,7 +2844,11 @@ public class Archivo
     {
         for (int i = 0; i < LTransicionM.size()-1; i++) 
         {
-            ListaTrans.add(LTransicionM.get(i).EstadoInicial+"|"+ LTransicionM.get(i).Elemento+","+ LTransicionM.get(i).Token+"|"+ LTransicionM.get(i).EstadoFinal);
+            String transi = LTransicionM.get(i).EstadoInicial+"|"+ LTransicionM.get(i).Elemento+","+ LTransicionM.get(i).Token+"|"+ LTransicionM.get(i).EstadoFinal + "|" + LTransicionM.get(i).Aceptacion;
+            if(!ListaTrans.contains(transi))
+            {
+                ListaTrans.add(transi);
+            }
         }
     }
     public boolean EsHoja(NodoExpresion Nodo)
