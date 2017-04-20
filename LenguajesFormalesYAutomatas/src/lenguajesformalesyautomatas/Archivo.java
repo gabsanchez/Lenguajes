@@ -2613,7 +2613,11 @@ public class Archivo
     List<List<String>> Estados = new ArrayList();
     List<Transicion> LTransicion =  new ArrayList();
     List<Transicion> LTransicionM =  new ArrayList();
+<<<<<<< HEAD
     int HojaAceptacion=0;
+=======
+    List<String> ListaTrans = new ArrayList();
+>>>>>>> 40656d32f00b089ed6f38c54cc6fd9fa7ef089dc
     public void TablaTransiciones()
     {
         //Crear Lista de Hojas
@@ -2796,8 +2800,15 @@ public class Archivo
                 }
             }
         }
+        LlenarListaTrans();
     }
-    
+    private void LlenarListaTrans()
+    {
+        for (int i = 0; i < LTransicionM.size()-1; i++) 
+        {
+            ListaTrans.add(LTransicionM.get(i).EstadoInicial+"|"+ LTransicionM.get(i).Elemento+","+ LTransicionM.get(i).Token+"|"+ LTransicionM.get(i).EstadoFinal);
+        }
+    }
     public boolean EsHoja(NodoExpresion Nodo)
     {
         boolean bandera = false;
@@ -2855,7 +2866,7 @@ public class Archivo
         }
     }
     
-    public void CodigoConjuntos()
+    public String CodigoConjuntos()
     { 
         String Code="";
         for (int i = 0; i < ConjuntosDeclarados.size(); i++) {
@@ -2936,6 +2947,12 @@ public class Archivo
             }
             Code+="}\n";
         }
+        return Code;
+    }
+    public void GenerarCodigoC() throws IOException
+    {
+        Automata generadorC = new Automata(ListaTrans, TAcciones, ConjuntosDeclarados, Elementos, nombreArchivo.substring(0, nombreArchivo.indexOf(".")));
+        generadorC.EsbribirCodigoCS();
     }
     // </editor-fold>
 }
