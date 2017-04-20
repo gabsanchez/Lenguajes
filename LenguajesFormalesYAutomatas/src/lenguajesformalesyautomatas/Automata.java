@@ -17,6 +17,7 @@ import java.util.List;
 public class Automata {
     List<String> Estados = new ArrayList();
     List<List<String>> Transiciones = new ArrayList();
+    List<String> Aceptaciones = new ArrayList();
     List<String> Reservadas = new ArrayList();
     List<String> Conjuntos = new ArrayList();
     List<String> Elementos = new ArrayList();
@@ -39,6 +40,7 @@ public class Automata {
                 }
             }
             Transiciones.add(temporal);
+            Aceptaciones.add(aux[3]);
         }
         for(String c : conjuntos)
         {
@@ -108,6 +110,7 @@ public class Automata {
         "    int estado = 0;\n" +
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
+        "    bool aceptacion = false;\n" +
         "    string[] Reservadas = " + ListaCadena(Reservadas) + ";\n" +
         "    long[] numReservadas = new long[Reservadas.Count];\n" +
         "    //string salida = \"\";\n" +
@@ -150,6 +153,10 @@ public class Automata {
         "            }\n" +
         "        }\n" +
         "    }\n" +
+        "  if(!aceptacion)\n" +
+        "  {\n" +
+        "     throw new Exception(\"La palabra no pertenece al lenguaje.\");\n" +
+        "  }\n" +
         "  return tacos;\n" +
         "}");
         fwCS.close();
@@ -168,6 +175,7 @@ public class Automata {
                         "                {\n" +
                         "                    " + CasosTokens(contador) + "\n" +
                         "                }\n" +
+                        "                aceptacion = " + Aceptaciones.get(contador) + ";\n" +
                         "                break;\n" +
                         "            }\n";
             }
