@@ -2613,11 +2613,8 @@ public class Archivo
     List<List<String>> Estados = new ArrayList();
     List<Transicion> LTransicion =  new ArrayList();
     List<Transicion> LTransicionM =  new ArrayList();
-<<<<<<< HEAD
     int HojaAceptacion=0;
-=======
     List<String> ListaTrans = new ArrayList();
->>>>>>> 40656d32f00b089ed6f38c54cc6fd9fa7ef089dc
     public void TablaTransiciones()
     {
         //Crear Lista de Hojas
@@ -2726,6 +2723,46 @@ public class Archivo
                 }
             }
 
+            boolean Segura=false;
+            while(!Segura)
+            {
+                for (int i = 0; i < LTransicion.size(); i++) {
+                    for (int j = 0; j < LTransicion.size(); j++) {
+                        if (i!=j) {
+                            if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {//revisar esto
+                                LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
+                                LTransicion.remove(j);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (LTransicion.size()>1) {
+                    for (int i = 0; i < LTransicion.size(); i++) {
+                        for (int j = 0; j < LTransicion.size(); j++) {
+                            if (i!=j) {
+                                if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {
+                                    Segura = false;
+                                    break;
+                                }
+                                else
+                                {
+                                    Segura = true;
+                                }
+                            }
+                        }
+                        if (!Segura) {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Segura = true;
+                }
+                
+            }
             for (int i = 0; i < LTransicion.size(); i++) {
                 for (int j = 0; j < LTransicion.size(); j++) {
                     if (i!=j) {
@@ -2757,7 +2794,8 @@ public class Archivo
                 }
                 LTransicionM.add(LTransicion.get(i));
             }
-
+            
+            //agregar estados
             for (int i = 0; i < LTransicion.size(); i++) {
                 if (!Estados.contains(LTransicion.get(i).TransicionFollow)) {
                     if (!LTransicion.get(i).TransicionFollow.isEmpty()) {
