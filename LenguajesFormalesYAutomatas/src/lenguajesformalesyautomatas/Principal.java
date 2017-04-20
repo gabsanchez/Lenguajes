@@ -178,10 +178,13 @@ public class Principal extends javax.swing.JFrame {
                 ta_FirstLast.append("ESTADOS");
                 ta_FirstLast.append("\n");
                 ta_FirstLast.append("\n");
-                for (int i = 0; i < entrada.LTransicionM.size()-1; i++) 
+                for (int i = 0; i < entrada.LTransicionM.size(); i++) 
                 {
-                    ta_FirstLast.append(entrada.LTransicionM.get(i).EstadoInicial+"|"+entrada.LTransicionM.get(i).Elemento+","+entrada.LTransicionM.get(i).Token+"|"+entrada.LTransicionM.get(i).EstadoFinal+"|"+entrada.LTransicionM.get(i).Aceptacion);
-                    ta_FirstLast.append("\n");
+                    if (!entrada.LTransicionM.get(i).Elemento.equals("#")) {
+                        ta_FirstLast.append(entrada.LTransicionM.get(i).EstadoInicial+"|"+entrada.LTransicionM.get(i).Elemento+","+entrada.LTransicionM.get(i).Token+"|"+entrada.LTransicionM.get(i).EstadoFinal+"|"+entrada.LTransicionM.get(i).Aceptacion);
+                        ta_FirstLast.append("\n");
+                    }
+                    
                 }
                 entrada.AccionesNecesarias();
                 //entrada.CodigoConjuntos();

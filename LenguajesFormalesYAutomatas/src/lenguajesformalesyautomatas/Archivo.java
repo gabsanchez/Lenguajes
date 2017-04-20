@@ -2660,16 +2660,45 @@ public class Archivo
             }
         }
         
-        for (int i = 0; i < LTransicion.size(); i++) {
-            for (int j = 0; j < LTransicion.size(); j++) {
-                if (i!=j) {
-                    if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {
-                        LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
-                        LTransicion.remove(j);
+        boolean Segura0=false;
+        while(!Segura0)
+        {
+            for (int i = 0; i < LTransicion.size(); i++) {
+                for (int j = 0; j < LTransicion.size(); j++) {
+                    if (i!=j) {
+                        if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {//revisar esto
+                            LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
+                            LTransicion.remove(j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (LTransicion.size()>1) {
+                for (int i = 0; i < LTransicion.size(); i++) {
+                    for (int j = 0; j < LTransicion.size(); j++) {
+                        if (i!=j) {
+                            if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {
+                                Segura0 = false;
+                                break;
+                            }
+                            else
+                            {
+                                Segura0 = true;
+                            }
+                        }
+                    }
+                    if (!Segura0) {
                         break;
                     }
                 }
             }
+            else
+            {
+                Segura0 = true;
+            }
+
         }
         
         for (int i = 0; i < LTransicion.size() ; i++) {
@@ -2677,7 +2706,9 @@ public class Archivo
                 for (int k = 0; k < LFollow.size(); k++) {
                     if (LTransicion.get(i).Transicion.get(j).equals(LFollow.get(k).Numero)) {                        
                         for (int l = 0; l < LFollow.get(k).Follow.size(); l++) {
-                            LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                            if (!LTransicion.get(i).TransicionFollow.contains(LFollow.get(k).Follow.get(l))) {
+                                LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                            }
                         }
                     }
                 }
@@ -2701,7 +2732,9 @@ public class Archivo
                 
         for (int i = 0; i < LTransicion.size(); i++) {
             if (!Estados.contains(LTransicion.get(i).TransicionFollow)) {
-                Estados.add(LTransicion.get(i).TransicionFollow);
+                if (!LTransicion.get(i).TransicionFollow.isEmpty()) {
+                    Estados.add(LTransicion.get(i).TransicionFollow);  
+                }
             }
             
         }
@@ -2763,24 +2796,16 @@ public class Archivo
                 }
                 
             }
-            for (int i = 0; i < LTransicion.size(); i++) {
-                for (int j = 0; j < LTransicion.size(); j++) {
-                    if (i!=j) {
-                        if (LTransicion.get(i).Elemento.equals(LTransicion.get(j).Elemento)) {//revisar esto
-                            LTransicion.get(i).Transicion.add(LTransicion.get(j).Transicion.get(0));
-                            LTransicion.remove(j);
-                            break;
-                        }
-                    }
-                }
-            }
+            
 
             for (int i = 0; i < LTransicion.size() ; i++) {
                 for (int j = 0; j < LTransicion.get(i).Transicion.size(); j++) {            
                     for (int k = 0; k < LFollow.size(); k++) {
                         if (LTransicion.get(i).Transicion.get(j).equals(LFollow.get(k).Numero)) {                        
                             for (int l = 0; l < LFollow.get(k).Follow.size(); l++) {
-                                LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                                if (!LTransicion.get(i).TransicionFollow.contains(LFollow.get(k).Follow.get(l))) {
+                                    LTransicion.get(i).TransicionFollow.add(LFollow.get(k).Follow.get(l)); 
+                                }
                             }
                         }
                     }
@@ -2789,6 +2814,7 @@ public class Archivo
 
             for (int i = 0; i < LTransicion.size(); i++) {
                 LTransicion.get(i).EstadoInicial = "S"+m;
+                
                 if (EstadoCero.contains(HojaAceptacion+"")) {
                     LTransicion.get(i).Aceptacion=true;
                 }
