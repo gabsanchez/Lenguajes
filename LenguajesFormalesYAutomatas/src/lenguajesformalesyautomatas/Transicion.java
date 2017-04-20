@@ -16,6 +16,7 @@ public class Transicion {
     public String Elemento;
     public int Token;
     public String EstadoInicial;
+    public boolean Aceptacion;
     public List<String> Transicion = new ArrayList();
     public List<String> TransicionFollow = new ArrayList();
     public String EstadoFinal;

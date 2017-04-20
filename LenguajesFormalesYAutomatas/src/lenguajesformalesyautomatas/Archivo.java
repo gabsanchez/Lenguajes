@@ -2613,6 +2613,7 @@ public class Archivo
     List<List<String>> Estados = new ArrayList();
     List<Transicion> LTransicion =  new ArrayList();
     List<Transicion> LTransicionM =  new ArrayList();
+    int HojaAceptacion=0;
     public void TablaTransiciones()
     {
         //Crear Lista de Hojas
@@ -2625,6 +2626,7 @@ public class Archivo
                 LHojas.add(H);
             }
         }
+        HojaAceptacion = Integer.parseInt(LHojas.get(LHojas.size()-1).First);
         //Crear Lista de Follows
         List<String> FollowLimpio = new ArrayList(); 
         for (int i = 0; i < TablaFollow.size(); i++) {
@@ -2680,9 +2682,19 @@ public class Archivo
                 }
             }
         }
+       
+        //if (EstadoCero.contains(HojaAceptacion+"")) { 
+        //    for (int i = 0; i < LTransicion.size(); i++) {
+        //    LTransicion.get(i).Aceptacion=true;
+        //    LTransicionM.add(LTransicion.get(i));
+        //}
+        //}
         
         for (int i = 0; i < LTransicion.size(); i++) {
             LTransicion.get(i).EstadoInicial = "S0";
+            if (EstadoCero.contains(HojaAceptacion+"")) {
+                LTransicion.get(i).Aceptacion=true;
+            }
             LTransicionM.add(LTransicion.get(i));
         }
                 
@@ -2736,6 +2748,9 @@ public class Archivo
 
             for (int i = 0; i < LTransicion.size(); i++) {
                 LTransicion.get(i).EstadoInicial = "S"+m;
+                if (EstadoCero.contains(HojaAceptacion+"")) {
+                    LTransicion.get(i).Aceptacion=true;
+                }
                 LTransicionM.add(LTransicion.get(i));
             }
 
