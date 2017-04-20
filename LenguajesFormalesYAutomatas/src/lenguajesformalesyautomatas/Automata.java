@@ -98,12 +98,11 @@ public class Automata {
         "        linea = lectorArchivo.ReadLine();\n" +
         "        //Separamos cada palabra por caracteres vacíos (espacios, saltos de línea y tabulaciones)\n" +
         "        string[] palabras = linea.Split(vacios);\n" +
-        "        StreamWriter Escritor = new StreamWriter(nombreArchivo.Substring(0,nombreArchivo.IndexOf(\".\")-1)+\"_out.txt\");\n" +
         "        foreach (string s in palabras)\n" +
         "        {\n" +
-        "            Escritor.WriteLine(s + \" = \" + Tomatoken(s));\n" +
+        "            string pertenencia = s + \" = \" + Tomatoken(s);\n" +
+        "            Console.WriteLine(pertenencia);\n" +
         "        }\n" +
-        "        Escritor.Close();\n" +
         "    }\n" +
         "}");
         fwCS.write(CodigoConjuntos());
@@ -113,6 +112,7 @@ public class Automata {
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
         "    bool aceptacion = false;\n" +
+        "    bool reserved = false;\n" +
         "    string[] Reservadas = " + ListaCadena(Reservadas) + ";\n" +
         "    int[] numReservadas = new int[Reservadas.Length];\n" +
         "    //string salida = \"\";\n" +
@@ -135,7 +135,7 @@ public class Automata {
         "        }\n" +
         "        else\n" +
         "        {\n" +
-        "            Reservadas[i] = aux[1].Substring(1, aux[1].Length - 1);\n" +
+        "            Reservadas[i] = aux[1].Substring(1, aux[1].Length - 2);\n" +
         "        }\n" +
         "    }\n" +
         "    for (int i = 0; i < Reservadas.Length; i++)\n" +
@@ -143,20 +143,25 @@ public class Automata {
         "        if(palabra == Reservadas[i])\n" +
         "        {\n" +
         "            tacos = numReservadas[i];\n" +
+        "            aceptacion = true;\n" +
+        "            reserved = true;\n" +
         "            break;\n" +
         "        }\n" +
         "    }\n" +
-        "    while(contador < palabra.Length)\n" +
+        "    if(!reserved)\n" +
         "    {\n" +
-        "        switch(estado)\n" +
-        "        {\n" +
-        "            " + CasosEstados() + "\n" +
+        "       while(contador < palabra.Length)\n" +
+        "       {\n" +
+        "           switch(estado)\n" +
+        "           {\n" +
+        "               " + CasosEstados() + "\n" +
         "            \n" +
-        "            default:\n" +
-        "            {\n" +
-        "                break;\n" +
-        "            }\n" +
-        "        }\n" +
+        "               default:\n" +
+        "               {\n" +
+        "                   break;\n" +
+        "               }\n" +
+        "           }\n" +
+        "       }\n" +
         "    }\n" +
         "  if(!aceptacion)\n" +
         "  {\n" +
