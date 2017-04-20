@@ -1,0 +1,6 @@
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\bin\Debug\Scanner.exe.config
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\bin\Debug\Scanner.exe
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\bin\Debug\Scanner.pdb
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\obj\Debug\Scanner.exe
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\obj\Debug\Scanner.pdb
+c:\users\jgsanchez\documents\visual studio 2017\Projects\Scanner\Scanner\obj\Debug\Scanner.csprojResolveAssemblyReference.cache
