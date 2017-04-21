@@ -374,63 +374,18 @@ public class Automata {
     }
     public void EsbribirCodigoCPP() throws IOException
     {
-        fwCPP.write("public void CargarArchivo(string nombreArchivo)\n" +
-        "{\n" +
-        "    // Variables locales\n" +
-        "    FileInfo informacionArchivo = null;\n" +
-        "    StreamReader lectorArchivo = null;\n" +
-        "\n" +
-        "    string linea = \"\";\n" +
-        "    \n" +
-        "    //Se quitan los espacios del nombre del archivo\n" +
-        "    nombreArchivo = nombreArchivo.Trim();\n" +
-        "\n" +
-        "    //Se valida que se ingrese un nombre de archivo\n" +
-        "    if (nombreArchivo.CompareTo(\"\") == 0)\n" +
-        "    {\n" +
-        "        throw new Exception(\"Se debe ingresar un nombre de archivo.\");\n" +
-        "    }\n" +
-        "\n" +
-        "    //Se valida que el archivo exista\n" +
-        "    informacionArchivo = new FileInfo(nombreArchivo);\n" +
-        "    \n" +
-        "    if (!informacionArchivo.Exists)\n" +
-        "    {\n" +
-        "        throw new Exception(\"Debe ingresar un nombre de archivo existente.\");\n" +
-        "    }\n" +
-        "\n" +
-        "    //Se abre el archivo para lectura\n" +
-        "    lectorArchivo = new StreamReader(nombreArchivo);\n" +
-        "\n" +
-        "    //Se recorre el archivo guardando su contenido en memoria\n" +
-        "    char[] vacios = {' ', '\\t'};\n" +
-        "    while (linea != null)\n" +
-        "    {\n" +
-        "        // Se obtiene la siguiente linea\n" +
-        "        linea = lectorArchivo.ReadLine();\n" +
-        "        //Separamos cada palabra por caracteres vacíos (espacios, saltos de línea y tabulaciones)\n" +
-        "        string[] palabras = linea.Split(vacios);\n" +
-        "        foreach (string s in palabras)\n" +
-        "        {\n" +
-        "            string pertenencia = s + \" = \" + Tomatoken(s);\n" +
-        "            Console.WriteLine(pertenencia);\n" +
-        "        }\n" +
-        "    }\n" +
-        "}");
         fwCPP.write(CodigoConjuntos());
-        fwCPP.write("private int Tomatoken(string palabra)\n" +
-        "{\n" +
+        fwCPP.write(
         "    int estado = 0;\n" +
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
         "    bool aceptacion = false;\n" +
         "    bool reserved = false;\n" +
-        "    string[] Reservadas = " + ListaCadena(Reservadas) + ";\n" +
-        "    int[] numReservadas = new int[Reservadas.Length];\n" +
-        "    //string salida = \"\";\n" +
+        "    string Reservadas [" + Reservadas.size() + "] = " + ListaCadena(Reservadas) + ";\n" +
+        "    int numReservadas [" + Reservadas.size() + "];\n" +
         "    " + LlamarMetodos() + "\n" +
         "    //Verificar si la palabara es reservada\n" +
-        "    for (int i = 0; i < Reservadas.Length; i++)\n" +
+        "    for (int i = 0; i < Reservadas->Length; i++)\n" +
         "    {\n" +
         "        Reservadas[i] = Reservadas[i].Replace(\'-\',\'\"\');\n" +
         "        string[] aux = Reservadas[i].Split('=');\n" +
@@ -481,8 +436,7 @@ public class Automata {
         "  {\n" +
         "     return " + Error + ";\n" +
         "  }\n" +
-        "  return tacos;\n" +
-        "}");
+        "  return tacos;\n");
         fwCPP.close();
     }
 }
