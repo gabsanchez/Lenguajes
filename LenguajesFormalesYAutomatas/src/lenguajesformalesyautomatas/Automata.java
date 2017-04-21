@@ -19,6 +19,8 @@ public class Automata {
     List<List<String>> Transiciones = new ArrayList();
     List<String> Aceptaciones = new ArrayList();
     List<String> Reservadas = new ArrayList();
+    List<String> ReservadasPlus = new ArrayList();
+    List<String> numReservadas = new ArrayList();
     List<String> Conjuntos = new ArrayList();
     List<String> Elementos = new ArrayList();
     List<String> MetodosLlamar = new ArrayList();
@@ -54,9 +56,14 @@ public class Automata {
         }
         for(String r : reservadas)
         {
-            r = r.replace("\"","-");
+            String rsharp = r.replace("\"","-");
+            String rplus = r.replace("\"","");
+            String[] partes = rplus.split("="); 
+            numReservadas.add(partes[0]);
+            ReservadasPlus.add(partes[1]);
             Reservadas.add(r);
         }
+        
         Error = error;
         fwCS = new FileWriter(nombre + ".cs");
         fwCPP = new FileWriter(nombre + ".cpp");
@@ -197,6 +204,28 @@ public class Automata {
         }
         return salida;
     }
+    private String CasosEstadosCPP()
+    {
+        String salida = "";
+        int contador = 0;
+        for(String s : Estados)
+        {
+            if(contador == 0 || !Estados.get(contador).equals(Estados.get(contador-1)))
+            {
+                salida = salida + "case " + s + ":\n" +
+                        "            {\n" +
+                        "                switch(palabra[contador])\n" +
+                        "                {\n" +
+                        "                    " + CasosTokensCPP(contador) + "\n" +
+                        "                }\n" +
+                        "                aceptacion = " + Aceptaciones.get(contador) + ";\n" +
+                        "                break;\n" +
+                        "            }\n";
+            }
+            contador++;
+        }
+        return salida;
+    }
     private String CasosTokens(int cont)
     {
         String subcaso = "";
@@ -245,7 +274,54 @@ public class Automata {
 "                     }\n";
         return subcaso + difolt;
     }
-
+    private String CasosTokensCPP(int cont)
+    {
+        String subcaso = "";
+        String difolt = "";
+        for(String trans : Transiciones.get(cont))
+        {
+            String[] aux = trans.split("\\|");
+            if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
+            {
+                subcaso = subcaso + "case " + aux[0].split(",")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+    "                    {\n" +
+    "                        tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                        estado = " + aux[1].substring(1) + ";\n" +
+    "                        break;\n" +
+    "                    }\n" +
+    "                    ";
+            }
+            else
+            {
+                if(!aux[0].split(",")[0].equals("#"))
+                {
+                    if(difolt.equals(""))
+                    {
+                        difolt = difolt + "if(find(" + aux[0].split(",")[0] + ".begin(), " + aux[0].split(",")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split(",")[0] + ".end())\n" +
+    "                         {\n" +
+    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                         }\n";
+                    }
+                    else
+                    {
+                        difolt = difolt +
+    "                         else if(find(" + aux[0].split(",")[0] + ".begin(), " + aux[0].split(",")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split(",")[0] + ".end())\n" +
+    "                         {\n" +
+    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                         }\n";
+                    }
+                }
+            }
+        }
+        difolt = "default:\n" +
+"                     {\n" +
+"                         " + difolt + "\n" +
+"                         break;\n" +
+"                     }\n";
+        return subcaso + difolt;
+    }
     private String ListaCadena(List<String> lista)//se convierte una lista a un string
     {
         String salida = "";
@@ -299,8 +375,8 @@ public class Automata {
             }
             String met = "Llenar"+Conjuntos.get(i)+"()";
             MetodosLlamar.add(met + ";");
-            Code+="public List<int> "+Conjuntos.get(i)+" = new List<int>();\n";
-            Code+="public void " + met;
+            Code+="List<int> "+Conjuntos.get(i)+" = new List<int>();\n";
+            Code+="public void " + met+"\n";
             Code+="{\n";
             for (int j = 0; j < Contenido.length; j++) {
                 if (Contenido[j].contains("..")) {
@@ -336,7 +412,7 @@ public class Automata {
                         Asccii2 = Integer.parseInt(num);
                     }
                     for (int k = Asccii1; k < Asccii2+1; k++) {
-                        Code+="\t"+Conjuntos.get(i)+".Add("+k+");\n";
+                        Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+k+");\n";
                     }
                 }
                 else
@@ -345,7 +421,7 @@ public class Automata {
                     if (Contenido[j].startsWith("'")||Contenido[j].startsWith("\"")) 
                     {
                         Asccii = (int)Contenido[j].charAt(1);
-                        Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
+                        Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+Asccii+");\n";
                     }
                     else if (Contenido[j].startsWith("c")) 
                     {
@@ -356,7 +432,92 @@ public class Automata {
                     
                     
                     
-                    Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
+                    Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+Asccii+");\n";
+                }
+            }
+            Code+="}\n";
+        }
+        return Code;
+    }
+    public String CodigoConjuntosCPP()
+    { 
+        String Code="";
+        for (int i = 0; i < Conjuntos.size(); i++) {
+            String[] Contenido = new String[1];
+            String Cont="";
+            if (!Elementos.get(i).toString().contains("+")) {
+                Contenido[0] = Elementos.get(i).toString();
+            }
+            else
+            {
+                //String usefulData = Elementos.get(i).toString();
+                //String[] list = null;
+                //String token = "+";
+                //list = usefulData.split(token);
+                Cont = Elementos.get(i);
+                Contenido = new String[Cont.split("\\+").length];
+                Contenido = Cont.split("\\+");                
+            }
+            String met = "Llenar"+Conjuntos.get(i)+"()";
+            MetodosLlamar.add(met + ";");
+            Code+="list<int> "+Conjuntos.get(i)+";\n";
+            Code+="void " + met+"\n";
+            Code+="{\n";
+            for (int j = 0; j < Contenido.length; j++) {
+                if (Contenido[j].contains("..")) {
+                    String puntos="";
+                    String[] Limites = new String[2];
+                    int Asccii1=0, Asccii2=0;
+                    //Limites =Contenido[j].split("..");
+                    Limites[0]=Contenido[j].substring(0,Contenido[j].indexOf("."));
+                    Limites[1]=Contenido[j].substring(Contenido[j].indexOf(".")+2,Contenido[j].length());
+                    //Limite 1
+                    if (Limites[0].startsWith("'")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("\"")) {
+                        Asccii1 = (int)Limites[0].charAt(1);
+                    }
+                    else if (Limites[0].startsWith("c")) {
+                        String num="";
+                        //num = Limites[0].split("(")[1].split(")")[0];
+                        num = Limites[0].substring( Limites[0].indexOf("(")+1, Limites[0].indexOf(")"));
+                        Asccii1 = Integer.parseInt(num);
+                    }
+                    //Limite 2
+                    if (Limites[1].startsWith("'")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("\"")) {
+                        Asccii2 = (int)Limites[1].charAt(1);
+                    }
+                    else if (Limites[1].startsWith("c")) {
+                        String num="";
+                        num = Limites[1].substring( Limites[1].indexOf("(")+1,  Limites[1].indexOf(")"));
+                        Asccii2 = Integer.parseInt(num);
+                    }
+                    for (int k = Asccii1; k < Asccii2+1; k++) {
+                        Code+="\t"+Conjuntos.get(i)+".push_back("+k+");\n";
+                    }
+                }
+                else
+                {
+                    int Asccii=0;
+                    if (Contenido[j].startsWith("'")||Contenido[j].startsWith("\"")) 
+                    {
+                        Asccii = (int)Contenido[j].charAt(1);
+                        Code+="\t"+Conjuntos.get(i)+".push_back("+Asccii+");\n";
+                    }
+                    else if (Contenido[j].startsWith("c")) 
+                    {
+                        String num="";
+                        num = Contenido[j].substring(Contenido[j].indexOf("(")+1, Contenido[j].indexOf(")"));
+                        Asccii = Integer.parseInt(num);
+                    }
+                    
+                    
+                    
+                    Code+="\t"+Conjuntos.get(i)+".push_back("+Asccii+");\n";
                 }
             }
             Code+="}\n";
@@ -372,42 +533,34 @@ public class Automata {
         }
         return salida;
     }
+    private String DeclararMetodos()
+    {
+        String salida = "";
+        for(String m : MetodosLlamar)
+        {
+            salida = salida +"void "+ m + "\n";
+        }
+        return salida;
+    }
     public void EsbribirCodigoCPP() throws IOException
     {
-        fwCPP.write(CodigoConjuntos());
-        fwCPP.write(
+        String temp = CodigoConjuntosCPP();
+        fwCPP.write(DeclararMetodos());
+        fwCPP.write(temp);
+        fwCPP.write("int Tomatoken(string palabra)\n" +
+        "{\n" +
         "    int estado = 0;\n" +
         "    int contador = 0;\n" +
         "    int tacos = 0; //token\n" +
         "    bool aceptacion = false;\n" +
         "    bool reserved = false;\n" +
-        "    string Reservadas [" + Reservadas.size() + "] = " + ListaCadena(Reservadas) + ";\n" +
+        "    string Reservadas [" + Reservadas.size() + "] = " + ListaCadena(ReservadasPlus) + ";\n" +
         "    int numReservadas [" + Reservadas.size() + "];\n" +
         "    " + LlamarMetodos() + "\n" +
         "    //Verificar si la palabara es reservada\n" +
-        "    for (int i = 0; i < Reservadas->Length; i++)\n" +
+        "    for (int i = 0; i < " + Reservadas.size() + "; i++)\n" +
         "    {\n" +
-        "        Reservadas[i] = Reservadas[i].Replace(\'-\',\'\"\');\n" +
-        "        string[] aux = Reservadas[i].Split('=');\n" +
-        "        numReservadas[i] = Convert.ToInt32(aux[0]);\n" +
-        "        if(aux.Length > 2)\n" +
-        "        {\n" +
-        "            string pal = \"\";\n" +
-        "            for(int j = 1; j < aux.Length; j++)\n" +
-        "            {\n" +
-        "                pal = pal + aux[j] + \"=\";\n" +
-        "            }\n" +
-        "            //pal = pal.Substring(1, pal.Length - 2);\n" +
-        "            Reservadas[i] = pal;\n" +
-        "        }\n" +
-        "        else\n" +
-        "        {\n" +
-        "            Reservadas[i] = aux[1].Substring(1, aux[1].Length - 2);\n" +
-        "        }\n" +
-        "    }\n" +
-        "    for (int i = 0; i < Reservadas.Length; i++)\n" +
-        "    {\n" +
-        "        if(palabra == Reservadas[i] || palabra.ToLower() == Reservadas[i])\n" +
+        "        if(palabra == Reservadas[i])\n" +
         "        {\n" +
         "            tacos = numReservadas[i];\n" +
         "            aceptacion = true;\n" +
@@ -418,11 +571,11 @@ public class Automata {
         "    if(!reserved)\n" +
         "    {\n" +
         "       palabra += \"#\";\n" +
-        "       while(contador < palabra.Length)\n" +
+        "       while(contador < palabra.length())\n" +
         "       {\n" +
         "           switch(estado)\n" +
         "           {\n" +
-        "               " + CasosEstados() + "\n" +
+        "               " + CasosEstadosCPP() + "\n" +
         "            \n" +
         "               default:\n" +
         "               {\n" +
@@ -436,7 +589,11 @@ public class Automata {
         "  {\n" +
         "     return " + Error + ";\n" +
         "  }\n" +
-        "  return tacos;\n");
+        "  else\n" +
+        "  {\n" +
+        "     return tacos;\n" +
+        "  }\n"+
+        "}");
         fwCPP.close();
     }
 }

@@ -3021,6 +3021,7 @@ public class Archivo
     {
         Automata generadorC = new Automata(ListaTrans, TAcciones, ConjuntosDeclarados, Elementos, nombreArchivo.substring(0, nombreArchivo.indexOf(".")), ListaNumeros.get(ListaNumeros.size()-1).toString());
         generadorC.EsbribirCodigoCS();
+        generadorC.EsbribirCodigoCPP();
     }
     // </editor-fold>
 }
