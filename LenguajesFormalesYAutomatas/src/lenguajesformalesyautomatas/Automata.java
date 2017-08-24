@@ -32,15 +32,15 @@ public class Automata {
     {
         for(String s : estados)
         {
-            String[] aux = s.split("\\|");
+            String[] aux = s.split("~");
             Estados.add(aux[0].substring(1));//Los estados están escritos como "S0, S1..." entonces obtenemos solamente el número sin la "S"
             List<String> temporal = new ArrayList();
             for(String e : estados)
             {
-                String[] aux1 = e.split("\\|");
+                String[] aux1 = e.split("~");
                 if(aux1[0].equals(aux[0]))
                 {
-                    temporal.add(aux1[1] + "|" + aux1[2]);
+                    temporal.add(aux1[1] + "~" + aux1[2]);
                 }
             }
             Transiciones.add(temporal);
@@ -232,36 +232,38 @@ public class Automata {
         String difolt = "";
         for(String trans : Transiciones.get(cont))
         {
-            String[] aux = trans.split("\\|");
+            String[] aux = trans.split("~");
+            int posCero = aux.length - 2;
+            int taco = aux[posCero].split("_").length - 1;
             if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
             {
-                subcaso = subcaso + "case " + aux[0].split(",")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+                subcaso = subcaso + "case " + aux[posCero].split("_")[taco-1] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
     "                    {\n" +
-    "                        tacos = " + aux[0].split(",")[1] + ";\n" +
-    "                        estado = " + aux[1].substring(1) + ";\n" +
+    "                        tacos = " + aux[posCero].split("_")[taco] + ";\n" +
+    "                        estado = " + aux[posCero + 1].substring(1) + ";\n" +
     "                        break;\n" +
     "                    }\n" +
     "                    ";
             }
             else
             {
-                if(!aux[0].split(",")[0].equals("#"))
+                if(!aux[posCero].split("_")[taco - 1].equals("#"))
                 {
                     if(difolt.equals(""))
                     {
-                        difolt = difolt + "if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
+                        difolt = difolt + "if(" + aux[posCero].split("_")[taco - 1] + ".Contains((int)palabra[contador]))\n" +
     "                         {\n" +
-    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
-    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                             tacos = " + aux[posCero].split("_")[taco] + ";\n" +
+    "                             estado = " + aux[posCero + 1].substring(1) + ";\n" +
     "                         }\n";
                     }
                     else
                     {
                         difolt = difolt +
-    "                         else if(" + aux[0].split(",")[0] + ".Contains((int)palabra[contador]))\n" +
+    "                         else if(" + aux[posCero].split("_")[taco - 1] + ".Contains((int)palabra[contador]))\n" +
     "                         {\n" +
-    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
-    "                             estado = " + aux[1].substring(1) + ";\n" +
+    "                             tacos = " + aux[posCero].split("_")[taco] + ";\n" +
+    "                             estado = " + aux[posCero + 1].substring(1) + ";\n" +
     "                         }\n";
                     }
                 }

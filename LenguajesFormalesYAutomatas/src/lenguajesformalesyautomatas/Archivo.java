@@ -1895,7 +1895,7 @@ public class Archivo
                                             caracterA = new String(buffer).toLowerCase();
                                             tam++;
                                         }
-                                        cont++;
+                                        //cont++;
                                         String conjunto;
                                         Leer(nombreArchivo, tam, aux);
                                         conjunto = new String(buffer).toLowerCase();
@@ -2870,7 +2870,7 @@ public class Archivo
     {
         for (int i = 0; i < LTransicionM.size(); i++) 
         {
-            String transi = LTransicionM.get(i).EstadoInicial+"|"+ LTransicionM.get(i).Elemento+","+ LTransicionM.get(i).Token+"|"+ LTransicionM.get(i).EstadoFinal + "|" + LTransicionM.get(i).Aceptacion;
+            String transi = LTransicionM.get(i).EstadoInicial+"~"+ LTransicionM.get(i).Elemento+"_"+ LTransicionM.get(i).Token+"~"+ LTransicionM.get(i).EstadoFinal + "~" + LTransicionM.get(i).Aceptacion;
             if(!ListaTrans.contains(transi))
             {
                 ListaTrans.add(transi);
