@@ -282,12 +282,12 @@ public class Automata {
         String difolt = "";
         for(String trans : Transiciones.get(cont))
         {
-            String[] aux = trans.split("\\|");
+            String[] aux = trans.split("~");
             if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
             {
-                subcaso = subcaso + "case " + aux[0].split(",")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+                subcaso = subcaso + "case " + aux[0].split("_")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
     "                    {\n" +
-    "                        tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                        tacos = " + aux[0].split("_")[1] + ";\n" +
     "                        estado = " + aux[1].substring(1) + ";\n" +
     "                        break;\n" +
     "                    }\n" +
@@ -295,22 +295,22 @@ public class Automata {
             }
             else
             {
-                if(!aux[0].split(",")[0].equals("#"))
+                if(!aux[0].split("_")[0].equals("#"))
                 {
                     if(difolt.equals(""))
                     {
-                        difolt = difolt + "if(find(" + aux[0].split(",")[0] + ".begin(), " + aux[0].split(",")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split(",")[0] + ".end())\n" +
+                        difolt = difolt + "if(find(" + aux[0].split("_")[0] + ".begin(), " + aux[0].split(",")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split("_")[0] + ".end())\n" +
     "                         {\n" +
-    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             tacos = " + aux[0].split("_")[1] + ";\n" +
     "                             estado = " + aux[1].substring(1) + ";\n" +
     "                         }\n";
                     }
                     else
                     {
                         difolt = difolt +
-    "                         else if(find(" + aux[0].split(",")[0] + ".begin(), " + aux[0].split(",")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split(",")[0] + ".end())\n" +
+    "                         else if(find(" + aux[0].split("_")[0] + ".begin(), " + aux[0].split("_")[0] + ".end(), (int)palabra[contador]) != " + aux[0].split("_")[0] + ".end())\n" +
     "                         {\n" +
-    "                             tacos = " + aux[0].split(",")[1] + ";\n" +
+    "                             tacos = " + aux[0].split("_")[1] + ";\n" +
     "                             estado = " + aux[1].substring(1) + ";\n" +
     "                         }\n";
                     }
