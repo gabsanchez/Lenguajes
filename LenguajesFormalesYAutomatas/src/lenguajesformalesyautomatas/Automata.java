@@ -187,7 +187,7 @@ public class Automata {
         "    }\n" +
         "    if(!reserved)\n" +
         "    {\n" +
-        "       palabra += \"#\"\n" +
+        "       palabra += \"#\";\n" +
         "       while(contador < palabra.Length)\n" +
         "       {\n" +
         "           switch(estado)\n" +
