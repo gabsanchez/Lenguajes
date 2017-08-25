@@ -33,11 +33,39 @@ public class Automata {
         for(String s : estados)
         {
             String[] aux = s.split("~");
+            if(aux.length > 4)
+            {
+                String[] _aux = aux;
+                aux = new String[4];
+                aux[0] = _aux[0];
+                aux[1] = "";
+                for (int i = 1; i < _aux.length - 3; i++)
+                {
+                    aux[1] = aux[1] + _aux[i] + "~";
+                }
+                aux[1] = aux[1] + _aux[_aux.length - 3];
+                aux[2] = _aux[_aux.length - 2];
+                aux[3] = _aux[_aux.length - 1];
+            }
             Estados.add(aux[0].substring(1));//Los estados están escritos como "S0, S1..." entonces obtenemos solamente el número sin la "S"
             List<String> temporal = new ArrayList();
             for(String e : estados)
             {
                 String[] aux1 = e.split("~");
+                if(aux1.length > 4)
+                {
+                    String[] _aux1 = aux1;
+                    aux1 = new String[4];
+                    aux1[0] = _aux1[0];
+                    aux1[1] = "";
+                    for (int i = 1; i < _aux1.length - 3; i++)
+                    {
+                        aux1[1] = aux1[1] + _aux1[i] + "~";
+                    }
+                    aux1[1] = aux1[1] + _aux1[_aux1.length - 3];
+                    aux1[2] = _aux1[_aux1.length - 2];
+                    aux1[3] = _aux1[_aux1.length - 1];
+                }
                 if(aux1[0].equals(aux[0]))
                 {
                     temporal.add(aux1[1] + "~" + aux1[2]);
@@ -233,37 +261,53 @@ public class Automata {
         for(String trans : Transiciones.get(cont))
         {
             String[] aux = trans.split("~");
-            int posCero = aux.length - 2;
-            int taco = aux[posCero].split("_").length - 1;
+            if(aux.length > 2)
+            {
+                String[] _aux = aux;
+                aux = new String[2];
+                aux[0] = "";
+                for (int i = 0; i < _aux.length - 2; i++)
+                {
+                    aux[0] = aux[0] + _aux[i] + "~";
+                }
+                aux[0] = aux[0] + _aux[_aux.length - 2];
+                aux[1] = _aux[_aux.length - 1];
+            }
             if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
             {
-                subcaso = subcaso + "case " + aux[posCero].split("_")[taco-1] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+                String car = aux[0].split("_")[0];
+                String comilla = car.substring(1, 2);
+                if(comilla.equals("\'"))
+                {
+                    car = "\'" + "\\" + "\'" + "\'";
+                }
+                subcaso = subcaso + "case " + car + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
     "                    {\n" +
-    "                        tacos = " + aux[posCero].split("_")[taco] + ";\n" +
-    "                        estado = " + aux[posCero + 1].substring(1) + ";\n" +
+    "                        tacos = " + aux[0].split("_")[1] + ";\n" +
+    "                        estado = " + aux[1].substring(1) + ";\n" +
     "                        break;\n" +
     "                    }\n" +
     "                    ";
             }
             else
             {
-                if(!aux[posCero].split("_")[taco - 1].equals("#"))
+                if(!aux[0].split("_")[0].equals("#"))
                 {
                     if(difolt.equals(""))
                     {
-                        difolt = difolt + "if(" + aux[posCero].split("_")[taco - 1] + ".Contains((int)palabra[contador]))\n" +
+                        difolt = difolt + "if(" + aux[0].split("_")[0] + ".Contains((int)palabra[contador]))\n" +
     "                         {\n" +
-    "                             tacos = " + aux[posCero].split("_")[taco] + ";\n" +
-    "                             estado = " + aux[posCero + 1].substring(1) + ";\n" +
+    "                             tacos = " + aux[0].split("_")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
     "                         }\n";
                     }
                     else
                     {
                         difolt = difolt +
-    "                         else if(" + aux[posCero].split("_")[taco - 1] + ".Contains((int)palabra[contador]))\n" +
+    "                         else if(" + aux[0].split("_")[0] + ".Contains((int)palabra[contador]))\n" +
     "                         {\n" +
-    "                             tacos = " + aux[posCero].split("_")[taco] + ";\n" +
-    "                             estado = " + aux[posCero + 1].substring(1) + ";\n" +
+    "                             tacos = " + aux[0].split("_")[1] + ";\n" +
+    "                             estado = " + aux[1].substring(1) + ";\n" +
     "                         }\n";
                     }
                 }
@@ -283,9 +327,27 @@ public class Automata {
         for(String trans : Transiciones.get(cont))
         {
             String[] aux = trans.split("~");
+            if(aux.length > 2)
+            {
+                String[] _aux = aux;
+                aux = new String[2];
+                aux[0] = "";
+                for (int i = 0; i < _aux.length - 2; i++)
+                {
+                    aux[0] = aux[0] + _aux[i] + "~";
+                }
+                aux[0] = aux[0] + _aux[_aux.length - 2];
+                aux[1] = _aux[_aux.length - 1];
+            }
             if(aux[0].startsWith("\"") || aux[0].startsWith("\'"))
             {
-                subcaso = subcaso + "case " + aux[0].split("_")[0] + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
+                String car = aux[0].split("_")[0];
+                String comilla = car.substring(1, 2);
+                if(comilla.equals("\'"))
+                {
+                    car = "\'" + "\\" + "\'" + "\'";
+                }
+                subcaso = subcaso + "case " + car + ":\n" + //se evaluan los casos en que el caracter de la palabra pertenezca al lenguaje
     "                    {\n" +
     "                        tacos = " + aux[0].split("_")[1] + ";\n" +
     "                        estado = " + aux[1].substring(1) + ";\n" +
@@ -414,7 +476,7 @@ public class Automata {
                         Asccii2 = Integer.parseInt(num);
                     }
                     for (int k = Asccii1; k < Asccii2+1; k++) {
-                        Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+k+");\n";
+                        Code+="\t"+Conjuntos.get(i)+".Add("+k+");\n";
                     }
                 }
                 else
@@ -423,7 +485,7 @@ public class Automata {
                     if (Contenido[j].startsWith("'")||Contenido[j].startsWith("\"")) 
                     {
                         Asccii = (int)Contenido[j].charAt(1);
-                        Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+Asccii+");\n";
+                        Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
                     }
                     else if (Contenido[j].startsWith("c")) 
                     {
@@ -434,7 +496,7 @@ public class Automata {
                     
                     
                     
-                    Code+="\t"+Conjuntos.get(i)+".Add("+j+", "+Asccii+");\n";
+                    Code+="\t"+Conjuntos.get(i)+".Add("+Asccii+");\n";
                 }
             }
             Code+="}\n";

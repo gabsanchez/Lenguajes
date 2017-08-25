@@ -377,6 +377,26 @@ public class Archivo
                                     flag--;
                                 }
                                 break;
+                            case "'":
+                            {
+                                Leer(nombreArchivo, 1, flag + 2);
+                                String tem = new String(buffer).toLowerCase();
+                                if(tem.equals("'"))
+                                {
+                                    flag = flag + 2;
+                                }
+                                break;
+                            }
+                            case "\"":
+                            {
+                                Leer(nombreArchivo, 1, flag + 2);
+                                String tem = new String(buffer).toLowerCase();
+                                if(tem.equals("\""))
+                                {
+                                    flag = flag + 2;
+                                }
+                                break;
+                            }
                             default:
                                 break;
                         }
